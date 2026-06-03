@@ -15,7 +15,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.util.Duration;
@@ -31,86 +30,6 @@ public class CryptographicAlgorithmVisualizer extends Application {
 	private final String DEFAULT_FONT = "Inter";
 	private final String DEFAULT_FONT_COLOR = "#152238";
 
-	private String defaultTabStyle() {
-		return	"-fx-background-color: transparent;" +
-			"-fx-text-fill: #30384A;" +
-			"-fx-background-radius: 18;" +
-			"-fx-border-radius: 18;" +
-			"-fx-padding: 7 22 7 22;" +
-			"-fx-font-size: 18px;";
-	}
-
-	private String activeTabStyle() {
-		return  "-fx-background-color: #172544;" +
-			"-fx-text-fill: white;" +
-			"-fx-background-radius: 18;" +
-			"-fx-border-radius: 18;" +
-			"-fx-padding: 7 22 7 22;" +
-			"-fx-font-size: 18px;";
-	}
-
-	private String defaultButtonStyle() {
-		return	"-fx-background-color: transparent;" +
-			"-fx-border-color: #d3d3d3;" +
-			"-fx-border-width: 1;" +
-			"-fx-background-radius: 4;" +
-			"-fx-border-radius: 4;" +
-			"-fx-border-width: 2px;" +
-			"-fx-text-fill: #30384A;" +
-			"-fx-font-size: 14px;";
-	}
-
-	private String activeButtonStyle() {
-		return	"-fx-background-color: #ff8c1a;" +
-			"-fx-border-color: #ff8c1a;" +
-			"-fx-border-width: 1;" +
-			"-fx-background-radius: 4;" +
-			"-fx-border-radius: 4;" +
-			"-fx-border-width: 2px;" +
-			"-fx-text-fill: white;" +
-			"-fx-font-size: 14px;";
-	}
-
-	private String defaultLetterStyle() {
-		return  "-fx-background-color: transparent;" +
-			"-fx-border-color: #D8D8D8;" +
-			"-fx-border-width: 2;" +
-			"-fx-border-radius: 5;" +
-			"-fx-background-radius: 5;" +
-			"-fx-text-fill: #404040;" +
-			"-fx-font-size: 14px;";
-	}
-
-	private String inputLetterStyle() {
-		return  "-fx-background-color: transparent;" +
-			"-fx-border-color: #ff9c33;" +
-			"-fx-border-width: 2;" +
-			"-fx-border-radius: 5;" +
-			"-fx-background-radius: 5;" +
-			"-fx-text-fill: #ff9c33;" +
-			"-fx-font-size: 14px;";
-	}
-
-	private String outputLetterStyle() {
-		return  "-fx-background-color: #152238;" +
-			"-fx-border-width: 2;" +
-			"-fx-border-radius: 5;" +
-			"-fx-background-radius: 5;" +
-			"-fx-text-fill: white;" +
-			"-fx-font-size: 14px;";
-	}
-
-	private String outputLabelStyle() {
-		return	"-fx-background-color: transparent;" +
-			"-fx-border-color: #ff9c33;" +
-			"-fx-border-width: 1;" +
-			"-fx-background-radius: 4;" +
-			"-fx-border-radius: 4;" +
-			"-fx-border-width: 2px;" +
-			"-fx-text-fill: #30384A;" +
-			"-fx-font-size: 14px;";
-	}
-
 	private Label getDefaultLabel(String value, boolean bold, double fontSize) {
 		Label label = new Label(value);
 
@@ -119,8 +38,6 @@ public class CryptographicAlgorithmVisualizer extends Application {
 		} else {
 			label.setFont(Font.font(DEFAULT_FONT, fontSize));
 		}
-
-		label.setStyle(String.format("-fx-text-fill: %s;", DEFAULT_FONT_COLOR));
 
 		return label;
 	}
@@ -135,38 +52,30 @@ public class CryptographicAlgorithmVisualizer extends Application {
 		for (String option : options) {
 			ToggleButton button = new ToggleButton(option);
 			button.setToggleGroup(group);
-			button.setStyle(defaultTabStyle());
+			button.getStyleClass().add("default-tab");
 			button.setPrefHeight(42);
-
-			// TODO Make the choice buttons change they style when hovered over without affecting the clicked effect
-			
-			//button.setOnMouseEntered(
-			//	e -> button.setStyle(activeTabStyle())		
-			//);
-
-			//button.setOnMouseExited(
-			//	e -> button.setStyle(defaultTabStyle())		
-			//);
 
 			buttons.add(button);
 			container.getChildren().add(button);
 
 		}
 
+		// TODO Make the choice buttons change they style when hovered over without affecting the clicked effect
+
 		group.selectedToggleProperty().addListener(
 			(obs, oldToggle, newToggle) -> {
-				for(ToggleButton button: buttons) {
-					button.setStyle(defaultTabStyle());
+				for (ToggleButton button : buttons) {
+					button.getStyleClass().remove("active-tab");
 				}
 
 				if (newToggle != null) {
-					((ToggleButton) newToggle).setStyle(activeTabStyle());
+					((ToggleButton) newToggle).getStyleClass().add("active-tab");
 				}
-		});
+			}
+		);
 
 		if (!buttons.isEmpty()) {
 			buttons.get(0).setSelected(true);
-			buttons.get(0).setStyle(activeTabStyle());
 		}
 
 		return container;
@@ -175,7 +84,7 @@ public class CryptographicAlgorithmVisualizer extends Application {
 
 	private Button getDefaultButton(String value) {
 		Button button = new Button(value);
-		button.setStyle(defaultButtonStyle());
+		button.getStyleClass().add("default-button");
 		button.setPrefWidth(125);
 		button.setPrefHeight(50);
 
@@ -194,7 +103,7 @@ public class CryptographicAlgorithmVisualizer extends Application {
 			Label letter = new Label(String.valueOf(ch));
 			letter.setPrefSize(35, 35);
 			letter.setAlignment(Pos.CENTER);
-			letter.setStyle(defaultLetterStyle());
+			letter.getStyleClass().add("default-letter");
 
 			int row = i % 13;
 			int column = i / 13;
@@ -208,7 +117,9 @@ public class CryptographicAlgorithmVisualizer extends Application {
 
 	private void resetHighlights() {
 		for (Label label : alphabetLabels) {
-			label.setStyle(defaultLetterStyle());
+			label.getStyleClass().remove("input-letter");
+			label.getStyleClass().remove("output-letter");
+			label.getStyleClass().add("default-letter");
 		}
 	}
 
@@ -263,7 +174,9 @@ public class CryptographicAlgorithmVisualizer extends Application {
 				Duration.seconds(1.5 * currentStep),
 				e -> {
 					resetHighlights();
-					alphabetLabels[original].setStyle(inputLetterStyle());
+					alphabetLabels[original].getStyleClass().remove("default-letter");
+					alphabetLabels[original].getStyleClass().remove("output-letter");
+					alphabetLabels[original].getStyleClass().add("input-letter");
 				}
 			);
 
@@ -271,7 +184,9 @@ public class CryptographicAlgorithmVisualizer extends Application {
 				Duration.seconds(1.5 * currentStep + 0.5),
 				e -> {
 					resetHighlights();
-					alphabetLabels[shifted].setStyle(outputLetterStyle());
+					alphabetLabels[shifted].getStyleClass().remove("default-letter");
+					alphabetLabels[shifted].getStyleClass().remove("input-letter");
+					alphabetLabels[shifted].getStyleClass().add("output-letter");
 					result.append(changed);
 					outputLabel.setText(result.toString());
 				}
@@ -309,9 +224,7 @@ public class CryptographicAlgorithmVisualizer extends Application {
 		inputField = new TextField();
 		inputField.setPrefWidth(630);
 		inputField.setPrefHeight(50);
-		inputField.setStyle(
-			"-fx-border-width: 2px;"
-		);
+		inputField.getStyleClass().add("input-field");
 
 		VBox textBox = new VBox(10);
 		textBox.getChildren().addAll(message, inputField);
@@ -322,29 +235,39 @@ public class CryptographicAlgorithmVisualizer extends Application {
 		Label spinnerMessage = getDefaultLabel("SHIFT VALUE", false, 18);
 
 		spinner.setValueFactory(valueFactory);
-		spinner.setEditable(true);
+		spinner.setEditable(false);
 		spinner.setPrefWidth(125);
 		spinner.setPrefHeight(45);
-		spinner.setStyle(defaultButtonStyle());
+		spinner.getStyleClass().add("default-button");
 
 		Button encryptButton = getDefaultButton("ENCRYPT");
 		encryptButton.setOnAction(e -> run(true));
 		encryptButton.setOnMouseEntered(
-			e -> encryptButton.setStyle(activeButtonStyle())		
+			e -> {
+				encryptButton.getStyleClass().remove("default-button");
+				encryptButton.getStyleClass().add("active-button");
+			}
 		);
-
 		encryptButton.setOnMouseExited(
-			e -> encryptButton.setStyle(defaultButtonStyle())		
+			e -> {
+				encryptButton.getStyleClass().remove("active-button");
+				encryptButton.getStyleClass().add("default-button");
+			}
 		);
 
 		Button decryptButton = getDefaultButton("DECRYPT");
 		decryptButton.setOnAction(e -> run(false));
 		decryptButton.setOnMouseEntered(
-			e -> decryptButton.setStyle(activeButtonStyle())		
+			e -> {
+				decryptButton.getStyleClass().remove("default-button");
+				decryptButton.getStyleClass().add("active-button");
+			}
 		);
-
 		decryptButton.setOnMouseExited(
-			e -> decryptButton.setStyle(defaultButtonStyle())		
+			e -> {
+				decryptButton.getStyleClass().remove("active-button");
+				decryptButton.getStyleClass().add("default-button");
+			}
 		);
 
 		Button resetButton = getDefaultButton("RESET");
@@ -355,11 +278,16 @@ public class CryptographicAlgorithmVisualizer extends Application {
 			}		
 		);
 		resetButton.setOnMouseEntered(
-			e -> resetButton.setStyle(activeButtonStyle())		
+			e -> {
+				resetButton.getStyleClass().remove("default-button");
+				resetButton.getStyleClass().add("active-button");
+			}
 		);
-
 		resetButton.setOnMouseExited(
-			e -> resetButton.setStyle(defaultButtonStyle())		
+			e -> {
+				resetButton.getStyleClass().remove("active-button");
+				resetButton.getStyleClass().add("default-button");
+			}
 		);
 
 		HBox functionalityBox = new HBox(45);
@@ -398,7 +326,7 @@ public class CryptographicAlgorithmVisualizer extends Application {
 		outputPane.setPrefWidth(630);
 		outputPane.setPrefHeight(120);
 		
-		outputPane.setStyle(outputLabelStyle());
+		outputPane.getStyleClass().add("output-label");
 
 		VBox resultBox = new VBox(10);
 		resultBox.getChildren().addAll(resultText, outputPane);
@@ -413,15 +341,9 @@ public class CryptographicAlgorithmVisualizer extends Application {
 		root.getChildren().addAll(titleBox, algorithmsSelectorContainer, userFunctionality, alphabetBox, resultContainer);
 		root.setPadding(new Insets(25));
 
-		root.setStyle(
-		    "-fx-background-color: linear-gradient(to right, " +
-		    "#f6f1d4 0%, " +
-		    "#fefefc 50%, " +
-		    "#f3edc7 100%);"
-		);
-
 		// Scene
 		Scene scene = new Scene(root);
+		scene.getStylesheets().add("style.css");
 		
 		// Setting Stage values and then showing it
 		stage.setTitle("Cryptographic Algorithm Visualizer");
