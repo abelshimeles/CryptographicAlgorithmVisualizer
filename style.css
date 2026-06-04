@@ -1,7 +1,14 @@
 .root {
 	-fx-background-color: linear-gradient(to right, #f6f1d4 0%, #fefefc 50%, #f3edc7 100%);
 	-fx-font-family: "Inter";
-	-fx-font-text-fill: "#152238";
+}
+
+.colored-text {
+	-fx-text-fill: #ff9c33;
+}
+
+.line-default {
+	-fx-background-color: #d4d4d4;
 }
 
 .default-tab {
