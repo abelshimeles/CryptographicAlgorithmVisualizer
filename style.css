@@ -7,6 +7,10 @@
 	-fx-text-fill: #ff9c33;
 }
 
+.calculation-theory {
+	-fx-text-fill: #d4d4d4;
+}
+
 .line-default {
 	-fx-background-color: #d4d4d4;
 }

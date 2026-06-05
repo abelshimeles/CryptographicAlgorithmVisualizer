@@ -1,9 +1,5 @@
 public class DiffieHellman {
-	public static int calculatePublicKey(int p, int g, int a) {
+	public static int calculateKey(int g, int a, int p) {
 		return (int) (Math.pow(g, a) % p);
-	}
-
-	public static int calculateSharedKey(int p, int B, int a) {
-		return (int) (Math.pow(B, a) % p);
 	}
 }
