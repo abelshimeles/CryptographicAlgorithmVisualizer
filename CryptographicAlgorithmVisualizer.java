@@ -11,6 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.GridPane;
@@ -39,6 +40,7 @@ public class CryptographicAlgorithmVisualizer extends Application {
 		sectionContainer.getChildren().setAll(algorithmSection.getSection());
 
 	}
+
 	@Override
 	public void start(Stage stage) {
 		// Title
@@ -53,13 +55,19 @@ public class CryptographicAlgorithmVisualizer extends Application {
 		HBox titleBox = new HBox();
 		titleBox.getChildren().add(title);
 		titleBox.setAlignment(Pos.CENTER);
+		
+		VBox body = new VBox(40);
+		body.getChildren().addAll(titleBox, algorithmsSelectorContainer, sectionContainer);
+		body.setPadding(new Insets(25));
+
+		ScrollPane scrollPane = new ScrollPane(body);
+		scrollPane.setFitToWidth(true);
+		scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+		scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 
 		// Root
-		VBox root = new VBox(40);
-
-		root.getChildren().addAll(titleBox, algorithmsSelectorContainer, sectionContainer);
-		root.setPadding(new Insets(25));
-
+		VBox root = new VBox(scrollPane);
+		
 		// Scene
 		Scene scene = new Scene(root);
 		scene.getStylesheets().add("style.css");

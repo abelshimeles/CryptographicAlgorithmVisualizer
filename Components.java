@@ -146,10 +146,10 @@ public class Components {
                 labelMessageContainer.getChildren().addAll(labelMessage, labelSymbol);
                 labelMessageContainer.setAlignment(Pos.CENTER);
 
-                labelField = new TextField("");
                 labelField.setPrefWidth(110);
                 labelField.setPrefHeight(40);
                 labelField.getStyleClass().add("input-field");
+		labelField.setAlignment(Pos.CENTER);
 
                 VBox labelContainer = new VBox(10);
                 labelContainer.getChildren().addAll(labelMessageContainer, labelField);
@@ -157,7 +157,7 @@ public class Components {
 		return labelContainer;
 	} 
 
-	public static VBox getKeyCalculation(String[] variables, int[] values, int answer) {
+	public static VBox getKeyCalculation(String[] variables, long[] values, long answer) {
                 Label userLabel = Components.getDefaultLabel(variables[0] + " Computes", false, 18);
 		HBox userLabelContainer = new HBox();
 		userLabelContainer.getChildren().add(userLabel);
@@ -203,7 +203,7 @@ public class Components {
 		return calculationsSectionContainer;
 	}
 
-	public static HBox getKeyExchangeSection(String sender, String reciever, String variable, int value) {
+	public static HBox getKeyExchangeSection(String sender, String reciever, String variable, long value) {
 		Label senderLabel = getDefaultLabel(sender + " sends", false, 14);
 		senderLabel.getStyleClass().add("calculation-theory");
 		HBox senderLabelContainer = new HBox();

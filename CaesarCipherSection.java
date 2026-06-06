@@ -23,10 +23,18 @@ public class CaesarCipherSection implements Section {
 	private Spinner<Integer> spinner;
 	private Label outputLabel;
 	private Label[] alphabetLabels = new Label[26];
+	private Button encryptButton;
+	private Button decryptButton;
+	private Button resetButton;
 
 	private void visualize(boolean encrypt) {
 		Components.resetHighlights(alphabetLabels);
 		outputLabel.setText("");
+
+		encryptButton.setDisable(true);
+		decryptButton.setDisable(true);
+		resetButton.setDisable(true);
+		
 		String text = inputField.getText().toUpperCase();
 		int shift = (int) spinner.getValue();
 
@@ -101,7 +109,12 @@ public class CaesarCipherSection implements Section {
 		timeline.getKeyFrames().add(
 		    new KeyFrame(
 			endTime.add(Duration.seconds(1)),
-			e -> Components.resetHighlights(alphabetLabels)
+			e -> {
+				Components.resetHighlights(alphabetLabels);
+				encryptButton.setDisable(false);
+				decryptButton.setDisable(false);
+				resetButton.setDisable(false);
+			}
 		    )
 		);
 
@@ -132,13 +145,13 @@ public class CaesarCipherSection implements Section {
 		spinner.setPrefHeight(45);
 		spinner.getStyleClass().add("default-button");
 
-		Button encryptButton = Components.getDefaultButton("ENCRYPT");
+		encryptButton = Components.getDefaultButton("ENCRYPT");
 		encryptButton.setOnAction(e -> visualize(true));
 
-		Button decryptButton = Components.getDefaultButton("DECRYPT");
+		decryptButton = Components.getDefaultButton("DECRYPT");
 		decryptButton.setOnAction(e -> visualize(false));
 
-		Button resetButton = Components.getDefaultButton("RESET");
+		resetButton = Components.getDefaultButton("RESET");
 		resetButton.setOnAction(
 			e -> {
 				inputField.setText("");

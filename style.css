@@ -3,6 +3,15 @@
 	-fx-font-family: "Inter";
 }
 
+.scroll-pane, 
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane > .corner {
+    -fx-background-color: transparent;
+}
+
 .colored-text {
 	-fx-text-fill: #ff9c33;
 }
