@@ -220,6 +220,7 @@ public class Components {
 		senderContainer.setAlignment(Pos.CENTER);
 
 		Label arrow = getDefaultLabel("\u2192", true, 70);
+		arrow.setAlignment(Pos.CENTER);
 		VBox arrowContainer = new VBox();
 		arrowContainer.getChildren().add(arrow);
 		arrowContainer.setAlignment(Pos.CENTER);
