@@ -109,3 +109,25 @@
 	-fx-text-fill: #30384A;
 	-fx-font-size: 14px
 }
+
+.plain-matrix-cell {
+	-fx-background-color: #ffff99;
+	-fx-border-color: #d3d3d3;
+	-fx-border-width: 2;
+	-fx-background-radius: 5;
+	-fx-text-fill: black;
+	-fx-alignment: center;
+	-fx-font-size: 14px
+
+}
+
+.key-matrix-cell {
+	-fx-background-color: #0086DF;
+	-fx-border-color: #d3d3d3;
+	-fx-border-width: 2;
+	-fx-background-radius: 5;
+	-fx-text-fill: black;
+	-fx-alignment: center;
+	-fx-font-size: 14px
+
+}

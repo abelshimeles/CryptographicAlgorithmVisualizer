@@ -51,144 +51,143 @@ public class AES {
 		{0x0B, 0x0D, 0x09, 0x0E}
 	};
 
-	public static int getSubstitutedValue(int b, boolean inverse) {
-		int row = (b >> 4) & 0x0F;
-		int column = b & 0x0F;
+        public static int getSubstitutedValue(int b, boolean inverse) {
+                b &= 0xFF;
 
-		if (!inverse) {
-			return SBOX[row][column];
-		}
+                int row = (b >> 4) & 0x0F;
+                int column = b & 0x0F;
 
-		return INV_SBOX[row][column];
-	}
+                if (!inverse) {
+                        return SBOX[row][column];
+                }
 
-	public static int[][] getSubstitutedMatrix(int[][] matrix) {
-		int[][] result = new int[4][4];
+                return INV_SBOX[row][column];
+        }
 
-		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < 4; j++) {
-				int byteValue = matrix[i][j];
-				result[i][j] = getSubstitutedValue(byteValue, false);
-			}
-			
-		}
+        public static int[][] getSubstitutedMatrix(int[][] matrix) {
+                int[][] result = new int[4][4];
 
-		return result;
-	}
+                for (int i = 0; i < 4; i++) {
+                        for (int j = 0; j < 4; j++) {
+                                int byteValue = matrix[i][j];
+                                result[i][j] = getSubstitutedValue(byteValue, false);
+                        }
+                }
 
-	public static int[][] getInverseSubstitutedMatrix(int[][] subMatrix) {
-		int[][] result = new int[4][4];
+                return result;
+        }
 
-		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < 4; j++) {
-				int byteValue = subMatrix[i][j];
-				result[i][j] = getSubstitutedValue(byteValue, true);
-			}
-			
-		}
+        public static int[][] getInverseSubstitutedMatrix(int[][] subMatrix) {
+                int[][] result = new int[4][4];
 
-		return result;
-	}
+                for (int i = 0; i < 4; i++) {
+                        for (int j = 0; j < 4; j++) {
+                                int byteValue = subMatrix[i][j];
+                                result[i][j] = getSubstitutedValue(byteValue, true);
+                        }
+                }
 
-	public static int[][] addRoundKey(int[][] state, int[][] round_key) {
-		int[][] resultMatrix = new int[4][4];
+                return result;
+        }
 
-		for (int i = 0; i < 4; i++) {
-			for(int j = 0; j < 4; j++) {
-				resultMatrix[i][j] = (state[i][j] ^ round_key[i][j]);
-			}
-		}
+        public static int[][] addRoundKey(int[][] state, int[][] round_key) {
+                int[][] resultMatrix = new int[4][4];
 
-		return resultMatrix;
-	}
+                for (int i = 0; i < 4; i++) {
+                        for (int j = 0; j < 4; j++) {
+                                resultMatrix[i][j] =
+                                        (state[i][j] ^ round_key[i][j]) & 0xFF;
+                        }
+                }
 
-	public static int[][] shiftRows(int[][] matrix) {
-		int[][] result = new int[4][4];
+                return resultMatrix;
+        }
 
-		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < 4; j++) {
-				int shiftIndex = (j - i + 4) % 4;
-				result[i][shiftIndex] = matrix[i][j];
-			}
-		}
+        public static int[][] shiftRows(int[][] matrix) {
+                int[][] result = new int[4][4];
 
-		return result;
-	}
+                for (int i = 0; i < 4; i++) {
+                        for (int j = 0; j < 4; j++) {
+                                int shiftIndex = (j - i + 4) % 4;
+                                result[i][shiftIndex] = matrix[i][j];
+                        }
+                }
 
-	public static int[][] inverseShiftRows(int[][] matrix) {
-		int[][] result = new int[4][4];
+                return result;
+        }
 
-		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < 4; j++) {
-				int shiftIndex = (j + i) % 4;
-				result[i][shiftIndex] = matrix[i][j];
-			}
-		}
+        public static int[][] inverseShiftRows(int[][] matrix) {
+                int[][] result = new int[4][4];
 
-		return result;
-	}
+                for (int i = 0; i < 4; i++) {
+                        for (int j = 0; j < 4; j++) {
+                                int shiftIndex = (j + i) % 4;
+                                result[i][shiftIndex] = matrix[i][j];
+                        }
+                }
 
-	public static int[][] bytesToMatrix(String message) {
-		int[][] byteMatrix = new int[4][4];
-		int row = 0;
+                return result;
+        }
 
-		for (int i = 0; i < message.length(); i += 4) {
-			for (int j = 0; j < 4; j++) {
-				int byteValue = (int) message.charAt(i + j);
-				byteMatrix[row][j] = byteValue;
-			}
-			
-			row += 1;
-		}
+        public static int[][] bytesToMatrix(String message) {
+                if (message.length() != 16) {
+                        throw new IllegalArgumentException(
+                                "AES block size must be exactly 16 characters");
+                }
 
-		return byteMatrix;
-	}
-	
-	public static String matrixToBytes(int[][] matrix) {
-		StringBuilder message = new StringBuilder();
+                int[][] byteMatrix = new int[4][4];
+                int column = 0;
 
-		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < 4; j++) {
-				char ch = (char) matrix[i][j];
-				message.append(String.valueOf(ch));
-			}
-		}
+                for (int i = 0; i < message.length(); i += 4) {
+                        for (int j = 0; j < 4; j++) {
+                                int byteValue = message.charAt(i + j) & 0xFF;
+                                byteMatrix[j][column] = byteValue;
+                        }
 
-		return message.toString();
+                        column++;
+                }
 
+                return byteMatrix;
+        }
 
-	}
+        public static String matrixToBytes(int[][] matrix) {
+                StringBuilder message = new StringBuilder();
 
-	public static String encrypt(String plaintext, String key) {
-	
-		int result[][] = bytesToMatrix(plaintext);
-		result = getSubstitutedMatrix(result);
-		result = shiftRows(result);
-		String ciphertext = matrixToBytes(result);
+                for (int column = 0; column < 4; column++) {
+                        for (int row = 0; row < 4; row++) {
+                                message.append((char) (matrix[row][column] & 0xFF));
+                        }
+                }
 
-		return ciphertext;
-	}
+                return message.toString();
+        }
 
-	public static String decrypt(String ciphertext, String key) {
-	
-		int result[][] = bytesToMatrix(ciphertext);
-		result = inverseShiftRows(result);
-		result = getInverseSubstitutedMatrix(result);
-		String plaintext = matrixToBytes(result);
+        public static String encrypt(String plaintext, String key) {
 
-		return plaintext;
-	}
+                int result[][] = bytesToMatrix(plaintext);
+                result = getSubstitutedMatrix(result);
+                result = shiftRows(result);
 
-	
-	public static void main(String[] args) {
-		String plaintext = "plaintextmessage";
-		String key = "key";
+                return matrixToBytes(result);
+        }
 
-		String ciphertext = AES.encrypt(plaintext, key);
-		String decrypted = AES.decrypt(ciphertext, key);
+        public static String decrypt(String ciphertext, String key) {
 
-		System.out.println("Ciphertext: " + ciphertext);
-		System.out.println("Plaintext: " + decrypted); 
-	}
+                int result[][] = bytesToMatrix(ciphertext);
+                result = inverseShiftRows(result);
+                result = getInverseSubstitutedMatrix(result);
 
+                return matrixToBytes(result);
+        }
+
+        public static void main(String[] args) {
+                String plaintext = "plaintextmessage";
+                String key = "abcdefghijklmnop";
+
+                String ciphertext = AES.encrypt(plaintext, key);
+                String decrypted = AES.decrypt(ciphertext, key);
+
+                System.out.println("Ciphertext: " + ciphertext);
+                System.out.println("Plaintext: " + decrypted);
+        }
 }

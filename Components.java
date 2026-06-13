@@ -198,7 +198,7 @@ public class Components {
 
                 HBox calculationsSectionContainer = new HBox(30);
                	calculationsSectionContainer.getChildren().addAll(calculationOne, line, calculationTwo);
-                calculationsSectionContainer.setAlignment(Pos.CENTER);
+                	calculationsSectionContainer.setAlignment(Pos.CENTER);
 
 		return calculationsSectionContainer;
 	}
@@ -236,5 +236,33 @@ public class Components {
 
 		return exchangeContainer;
 
+	}
+
+	public static VBox createMatrixGrid(String title, Label[][] cells, int[][] matrix, String style) {
+		Label gridLabel = getDefaultLabel(title, false, 18);
+		HBox gridLabelBox = new HBox();
+		gridLabelBox.getChildren().add(gridLabel);
+		gridLabelBox.setAlignment(Pos.CENTER);
+
+		GridPane grid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 4; col++) {
+				Label cell = new Label(toHex(matrix[row][col]));
+				cell.setMinSize(50, 50);
+				cell.getStyleClass().add(style);
+				cells[row][col] = cell;
+				grid.add(cell, col, row+1);
+			}
+		}
+
+		VBox gridBox = new VBox(15);
+		gridBox.getChildren().addAll(gridLabelBox, grid);
+
+		return gridBox;
+	}
+
+	public static String toHex(int value) {
+		return String.format("%02x", value & 0xFF).toUpperCase();
 	}
 }
