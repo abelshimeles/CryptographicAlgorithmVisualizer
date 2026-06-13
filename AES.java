@@ -1,3 +1,5 @@
+// Learned most implementations from https://www.samiam.org/rijndael.html
+
 public class AES {
 	public static final int[][] SBOX = {
 		{0x63,0x7C,0x77,0x7B,0xF2,0x6B,0x6F,0xC5,0x30,0x01,0x67,0x2B,0xFE,0xD7,0xAB,0x76},
@@ -51,6 +53,133 @@ public class AES {
 		{0x0B, 0x0D, 0x09, 0x0E}
 	};
 
+	public static final int[][] RCON = {
+		{0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36},
+		{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+		{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+		{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
+	};
+
+	private static int[] copyColumn(int[][] array, int column) {
+		int result[] = new int[4];
+
+		for (int i = 0; i < 4; i++) {
+			result[i] = array[i][column];
+		}
+
+		return result;
+	}
+
+	private static int[] copyArray(int[] array) {
+		int[] result = new int[4];
+
+		for (int i = 0; i < 4; i++) {
+			result[i] = array[i];
+		}	
+
+		return result;
+	}
+
+	private static int[][] copyMatrix(int[][] matrix) {
+		int[][] result = new int[4][4];
+
+		for (int row = 0; row < 4; row++) {
+			for(int col = 0; col < 4; col++) {
+				result[row][col] = matrix[row][col];
+			}
+		}
+
+		return result;
+	}
+
+	private static void updateColumn(int[][] array, int[] newColumn, int column) {
+		for (int i = 0; i < 4; i++) {
+			array[i][column] = newColumn[i];
+		}
+	}
+
+	private static int galoisAdd(int a, int b) {
+		return (a ^ b) & 0xFF;
+	}
+
+	private static int galoisMultiply(int a, int b) {
+		int p = 0;
+		a &= 0xFF;
+		b &= 0xFF;
+
+		for (int counter = 0; counter < 8; counter++) {
+			if((b & 0x1) != 0) {
+				p ^= a;
+			}
+			int hiBitSet = a & 0x80;
+
+			a <<=1;
+
+			if(hiBitSet != 0x0) {
+				a ^= 0x1B;
+			}
+
+			a &= 0xFF;
+			b >>= 0x1;
+		}
+
+		return p & 0xFF;
+	}
+
+	private static int[] galoisAddColumn(int[] column1, int[] column2) {
+		int[] result = new int[4];
+
+		for(int i = 0; i < 4; i++) {
+			result[i] = galoisAdd(column1[i], column2[i]);
+		}
+
+		return result;
+	}
+
+	public static int[] rotWord(int[] column) {
+		int result[] = copyArray(column);
+		int firstElement = result[0];
+		
+		for (int i = 0; i < 3; i++) {
+			result[i] = result[i+1];
+		}
+
+		result[3] = firstElement;
+		
+		return result;
+	}
+
+	public static int[] substitutedRotWordColumn(int[] rotWordColumn) {
+		int result[] = copyArray(rotWordColumn);
+
+		for (int i = 0; i < 4; i++) {
+			result[i] = getSubstitutedValue(result[i], false);
+		}
+
+		return result;
+	}
+
+	public static int[][] getRoundKey(int[][] prevRoundKey, int round) {
+		int[][] roundKey = new int[4][4];
+		int[] rConColumn = copyColumn(RCON, round-1);
+
+		int[] result = rotWord(copyColumn(prevRoundKey, 3));
+		result = substitutedRotWordColumn(result);
+		result = galoisAddColumn(copyColumn(prevRoundKey, 0), result);
+		result = galoisAddColumn(result, rConColumn);
+
+		updateColumn(roundKey, result, 0);
+
+		for (int i = 1; i < 4; i++) {
+			result = galoisAddColumn(copyColumn(roundKey, i-1), copyColumn(prevRoundKey, i));
+			updateColumn(roundKey, result, i);
+		}
+
+		return roundKey;
+
+		
+	}
+
         public static int getSubstitutedValue(int b, boolean inverse) {
                 b &= 0xFF;
 
@@ -90,18 +219,6 @@ public class AES {
                 return result;
         }
 
-        public static int[][] addRoundKey(int[][] state, int[][] round_key) {
-                int[][] resultMatrix = new int[4][4];
-
-                for (int i = 0; i < 4; i++) {
-                        for (int j = 0; j < 4; j++) {
-                                resultMatrix[i][j] =
-                                        (state[i][j] ^ round_key[i][j]) & 0xFF;
-                        }
-                }
-
-                return resultMatrix;
-        }
 
         public static int[][] shiftRows(int[][] matrix) {
                 int[][] result = new int[4][4];
@@ -129,6 +246,85 @@ public class AES {
                 return result;
         }
 
+	private static int[] transformColumn(int[] column, int[][] matrix) {
+		int[] result = new int[4];
+		
+		for (int row = 0; row < 4; row++) {
+			int r = 0;
+			for (int col = 0; col < 4; col++) {
+				r ^= galoisMultiply(column[col], matrix[row][col]);
+			}
+
+			result[row] = r & 0xFF;
+		}
+
+		return result;
+	}
+
+	public static int[] mixColumn(int[] column) {
+		return transformColumn(column, MIX_COLUMN);
+	}
+
+	public static int[][] mixColumns(int[][] state) {
+		int[][] result = new int[4][4];
+
+		for(int c = 0; c < 4; c++) {
+			int[] column = new int[] {
+				state[0][c],
+				state[1][c],
+				state[2][c],
+				state[3][c]
+			};
+
+			int[] mixCol = mixColumn(column);
+
+			for(int r = 0; r < 4; r++) {
+				result[r][c] = mixCol[r];
+			}
+		}
+
+		return result;
+
+	}
+
+	public static int[] inverseMixColumn(int[] column) {
+		return transformColumn(column, INV_MIX_COLUMN);
+	}
+
+	public static int[][] inverseMixColumns(int[][] state) {
+		int[][] result = new int[4][4];
+
+		for(int c = 0; c < 4; c++) {
+			int[] column = new int[] {
+				state[0][c],
+				state[1][c],
+				state[2][c],
+				state[3][c]
+			};
+
+			int[] mixCol = inverseMixColumn(column);
+
+			for(int r = 0; r < 4; r++) {
+				result[r][c] = mixCol[r];
+			}
+		}
+
+		return result;
+
+	}
+
+        public static int[][] addRoundKey(int[][] state, int[][] round_key) {
+                int[][] resultMatrix = new int[4][4];
+
+                for (int i = 0; i < 4; i++) {
+                        for (int j = 0; j < 4; j++) {
+                                resultMatrix[i][j] = galoisAdd(state[i][j], round_key[i][j]);
+                        }
+                }
+
+                return resultMatrix;
+        }
+
         public static int[][] bytesToMatrix(String message) {
                 if (message.length() != 16) {
                         throw new IllegalArgumentException(
@@ -150,44 +346,49 @@ public class AES {
                 return byteMatrix;
         }
 
-        public static String matrixToBytes(int[][] matrix) {
-                StringBuilder message = new StringBuilder();
+	public static String matrixToHex(int[][] matrix) {
+		StringBuilder hex = new StringBuilder();
 
-                for (int column = 0; column < 4; column++) {
-                        for (int row = 0; row < 4; row++) {
-                                message.append((char) (matrix[row][column] & 0xFF));
-                        }
-                }
+		for (int col = 0; col < 4; col++) {
+			for (int row = 0; row < 4; row++) {
+				hex.append(String.format("%02x", matrix[row][col] & 0xFF));
+			}
+		}
 
-                return message.toString();
-        }
+		return hex.toString();
+	}
 
-        public static String encrypt(String plaintext, String key) {
+	public static String encrypt(String plaintext, String cipherKey) {
+		int[][] state = bytesToMatrix(plaintext);
+		int[][] roundKey = copyMatrix(bytesToMatrix(cipherKey));
 
-                int result[][] = bytesToMatrix(plaintext);
-                result = getSubstitutedMatrix(result);
-                result = shiftRows(result);
+		int[][] result = addRoundKey(state, roundKey);
 
-                return matrixToBytes(result);
-        }
+		for (int round = 1; round < 10; round++) {
+			roundKey = getRoundKey(roundKey, round);
+			result = getSubstitutedMatrix(result);
+			result = shiftRows(result);
+			result = mixColumns(result);
+			result = addRoundKey(result, roundKey);
+		}
 
-        public static String decrypt(String ciphertext, String key) {
+		roundKey = getRoundKey(roundKey, 10);
+		result = getSubstitutedMatrix(result);
+		result = shiftRows(result);
+		result = addRoundKey(result, roundKey);
 
-                int result[][] = bytesToMatrix(ciphertext);
-                result = inverseShiftRows(result);
-                result = getInverseSubstitutedMatrix(result);
-
-                return matrixToBytes(result);
-        }
+		String ciphertext = matrixToHex(result);
+		
+		return ciphertext;
+		
+	}
 
         public static void main(String[] args) {
                 String plaintext = "plaintextmessage";
                 String key = "abcdefghijklmnop";
 
                 String ciphertext = AES.encrypt(plaintext, key);
-                String decrypted = AES.decrypt(ciphertext, key);
-
                 System.out.println("Ciphertext: " + ciphertext);
-                System.out.println("Plaintext: " + decrypted);
+
         }
 }
