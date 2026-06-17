@@ -10,12 +10,40 @@ import javafx.scene.layout.GridPane;
 public class AESSection implements Section { 
         private Label[][] plainCells = new Label[4][4];
         private Label[][] keyCells = new Label[4][4];
+        private Label[][] sBoxCells = new Label[17][17];
 
 	private TextField inputField;
 	private TextField keyField;
 	private Button encryptButton;
 	private Button decryptButton;
 	private Button resetButton;
+
+	private HBox subBytesVisualize(int[][] state) {
+		VBox stateGrid = Components.createMatrixGrid("STATE", plainCells, state, "plain-matrix-cell");
+		stateGrid.setAlignment(Pos.CENTER);
+		VBox sBoxGrid = Components.createSBoxMatrixGrid("SBOX", sBoxCells);
+
+		HBox subBytesBox = new HBox(80);
+		subBytesBox.getChildren().addAll(stateGrid,sBoxGrid);
+		subBytesBox.setAlignment(Pos.CENTER);
+
+		return subBytesBox;
+
+		
+	}
+
+	private void visualize(HBox matrixBox) {
+		String plaintext = inputField.getText();
+		String key = keyField.getText();
+
+		int[][] plainMatrix = AES.bytesToMatrix(plaintext);
+		int[][] keyMatrix = AES.bytesToMatrix(key);
+		
+		HBox subBytesBox = subBytesVisualize(plainMatrix);
+
+		matrixBox.getChildren().addAll(subBytesBox);
+		matrixBox.setAlignment(Pos.CENTER);
+       }
 
 	@Override
 	public VBox getSection() {
@@ -53,27 +81,16 @@ public class AESSection implements Section {
 		HBox buttonsBox = new HBox(45);
 		buttonsBox.getChildren().addAll(encryptButton, decryptButton, resetButton);
 		buttonsBox.setAlignment(Pos.CENTER);
-		
+
 		VBox controls = new VBox(35);
 		controls.getChildren().addAll(userInputBox, buttonsBox);
 
-                String plaintext = "plaintextmessage";
-                String key = "abcdefghijklmnop";
-
-                int[][] plainMatrix = AES.bytesToMatrix(plaintext);
-                int[][] keyMatrix = AES.bytesToMatrix(key);
-
-                VBox stateGrid = Components.createMatrixGrid("STATE", plainCells, plainMatrix, "plain-matrix-cell");
-                VBox keyGrid = Components.createMatrixGrid("CIPHER KEY", keyCells, keyMatrix, "key-matrix-cell");
-
-                HBox matrixBox = new HBox(50);
-                matrixBox.getChildren().addAll(stateGrid, keyGrid);
-		matrixBox.setAlignment(Pos.CENTER);
-
+		HBox matrixBox = new HBox(80);
+		encryptButton.setOnAction(e -> visualize(matrixBox));
 
 		VBox section = new VBox(40);
 		section.getChildren().addAll(controls, matrixBox);
-		
+
 		return section;
 	}
 }

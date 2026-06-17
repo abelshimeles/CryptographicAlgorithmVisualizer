@@ -249,10 +249,58 @@ public class Components {
 		for (int row = 0; row < 4; row++) {
 			for (int col = 0; col < 4; col++) {
 				Label cell = new Label(toHex(matrix[row][col]));
-				cell.setMinSize(50, 50);
+				cell.setMinSize(60, 60);
 				cell.getStyleClass().add(style);
 				cells[row][col] = cell;
 				grid.add(cell, col, row+1);
+			}
+		}
+
+		VBox gridBox = new VBox(15);
+		gridBox.getChildren().addAll(gridLabelBox, grid);
+
+		return gridBox;
+	}
+
+	public static VBox createSBoxMatrixGrid(String title, Label[][] cells) {
+		Label gridLabel = getDefaultLabel("SBOX", false, 18);
+		HBox gridLabelBox = new HBox();
+		gridLabelBox.getChildren().add(gridLabel);
+		gridLabelBox.setAlignment(Pos.CENTER);
+
+		GridPane grid = new GridPane();
+
+		int[][] SBOX = AES.SBOX;
+
+		Label lookupMessageCell = new Label("HEX");
+		lookupMessageCell.setMinSize(40, 40);
+		lookupMessageCell.getStyleClass().add("sbox-matrix-cell");
+		cells[0][0] = lookupMessageCell;
+		grid.add(lookupMessageCell, 0, 0);
+
+		for (int col = 1; col < 17; col++) {
+			Label cell = new Label(String.format("%X", col - 1));
+			cell.setMinSize(30, 30);
+			cell.getStyleClass().add("sbox-matrix-column-lookup-cell");
+			cells[0][col] = cell;
+			grid.add(cell, col, 0);
+		}
+
+		for (int row = 1; row < 17; row++) {
+			Label cell = new Label(String.format("%X", row-1));
+			cell.setMinSize(30, 30);
+			cell.getStyleClass().add("sbox-matrix-row-lookup-cell");
+			cells[row][0] = cell;
+			grid.add(cell, 0, row);
+		}
+
+		for (int row = 1; row < 17; row++) {
+			for (int col = 1; col < 17; col++) {
+				Label cell = new Label(toHex(SBOX[row - 1][col - 1]));
+				cell.setMinSize(30, 30);
+				cell.getStyleClass().add("sbox-matrix-cell");
+				cells[row][col] = cell;
+				grid.add(cell, col, row);
 			}
 		}
 
