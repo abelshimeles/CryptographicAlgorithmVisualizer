@@ -121,6 +121,16 @@
 
 }
 
+.plain-matrix-cell-substituted {
+	-fx-background-color: #ffce63;
+	-fx-border-color: #d3d3d3;
+	-fx-border-width: 2;
+	-fx-background-radius: 5;
+	-fx-text-fill: black;
+	-fx-alignment: center;
+	-fx-font-size: 14px;
+
+}
 .key-matrix-cell {
 	-fx-background-color: #0086DF;
 	-fx-border-color: #d3d3d3;
@@ -154,6 +164,26 @@
 
 .sbox-matrix-cell {
 	-fx-background-color: #ffffff;
+	-fx-border-color: #d3d3d3;
+	-fx-border-width: 2;
+	-fx-background-radius: 5;
+	-fx-text-fill: black;
+	-fx-alignment: center;
+	-fx-font-size: 12px;
+}
+
+.sbox-matrix-cells-highlight {
+	-fx-background-color: #ffe9bb;
+	-fx-border-color: #d3d3d3;
+	-fx-border-width: 2;
+	-fx-background-radius: 5;
+	-fx-text-fill: black;
+	-fx-alignment: center;
+	-fx-font-size: 12px;
+}
+
+.sbox-matrix-cell-highlight {
+	-fx-background-color: #ffce63;
 	-fx-border-color: #d3d3d3;
 	-fx-border-width: 2;
 	-fx-background-radius: 5;

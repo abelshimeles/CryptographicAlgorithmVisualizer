@@ -238,6 +238,14 @@ public class Components {
 
 	}
 
+	public static Label getCell(int value, int w, int h, String style) {
+		Label cell = new Label(toHex(value));
+		cell.setMinSize(60, 60);
+		cell.getStyleClass().add(style);
+
+		return cell;
+	
+	}
 	public static VBox createMatrixGrid(String title, Label[][] cells, int[][] matrix, String style) {
 		Label gridLabel = getDefaultLabel(title, false, 18);
 		HBox gridLabelBox = new HBox();
@@ -248,9 +256,7 @@ public class Components {
 
 		for (int row = 0; row < 4; row++) {
 			for (int col = 0; col < 4; col++) {
-				Label cell = new Label(toHex(matrix[row][col]));
-				cell.setMinSize(60, 60);
-				cell.getStyleClass().add(style);
+				Label cell = getCell(matrix[row][col], 60, 60, style);
 				cells[row][col] = cell;
 				grid.add(cell, col, row+1);
 			}
