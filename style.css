@@ -121,6 +121,17 @@
 
 }
 
+.plain-matrix-cell-empty {
+	-fx-background-color: transparent;
+	-fx-border-color: #d3d3d3;
+	-fx-border-width: 2;
+	-fx-background-radius: 5;
+	-fx-text-fill: black;
+	-fx-alignment: center;
+	-fx-font-size: 14px;
+
+}
+
 .plain-matrix-cell-substituted {
 	-fx-background-color: #ffce63;
 	-fx-border-color: #d3d3d3;
@@ -131,6 +142,7 @@
 	-fx-font-size: 14px;
 
 }
+
 .key-matrix-cell {
 	-fx-background-color: #0086DF;
 	-fx-border-color: #d3d3d3;
@@ -138,7 +150,18 @@
 	-fx-background-radius: 5;
 	-fx-text-fill: black;
 	-fx-alignment: center;
-	-fx-font-size: 18px;
+	-fx-font-size: 14px;
+
+}
+
+.round-key-matrix-cell {
+	-fx-background-color: #c0c0c0;
+	-fx-border-color: #d3d3d3;
+	-fx-border-width: 2;
+	-fx-background-radius: 5;
+	-fx-text-fill: black;
+	-fx-alignment: center;
+	-fx-font-size: 14px;
 
 }
 

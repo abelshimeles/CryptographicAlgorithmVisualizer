@@ -126,7 +126,7 @@ public class AES {
 		return p & 0xFF;
 	}
 
-	private static int[] galoisAddColumn(int[] column1, int[] column2) {
+	public static int[] galoisAddColumn(int[] column1, int[] column2) {
 		int[] result = new int[4];
 
 		for(int i = 0; i < 4; i++) {

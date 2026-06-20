@@ -240,7 +240,16 @@ public class Components {
 
 	public static Label getCell(int value, int w, int h, String style) {
 		Label cell = new Label(toHex(value));
-		cell.setMinSize(60, 60);
+		cell.setMinSize(w, h);
+		cell.getStyleClass().add(style);
+
+		return cell;
+	
+	}
+
+	public static Label getEmptyCell(int w, int h, String style) {
+		Label cell = new Label("");
+		cell.setMinSize(w, h);
 		cell.getStyleClass().add(style);
 
 		return cell;
@@ -334,10 +343,12 @@ public class Components {
 
 		VBox leftBracket = new VBox();
 		leftBracket.setMinWidth(20);
+		leftBracket.setPrefHeight(30);
 		leftBracket.getStyleClass().add("left-bracket");
 
 		VBox rightBracket = new VBox();
 		rightBracket.setMinWidth(20);
+		rightBracket.setPrefHeight(30);
 		rightBracket.getStyleClass().add("right-bracket");
 
 		HBox matrix = new HBox(10);
@@ -381,6 +392,300 @@ public class Components {
 
 		VBox gridBox = new VBox(15);
 		gridBox.getChildren().addAll(gridLabelBox, grid);
+
+		return gridBox;
+	}
+
+	public static HBox createInputRound(int[][] state, int[][] cipherKey) {
+		Label inputLabel = getDefaultLabel("INITIAL", true, 18);
+		VBox inputLabelBox = new VBox();
+		inputLabelBox.getChildren().add(inputLabel);
+		inputLabelBox.setAlignment(Pos.CENTER);
+
+		Label startLabel = Components.getDefaultLabel("START ROUND", false, 18);
+		HBox startLabelBox = new HBox();
+		startLabelBox.getChildren().add(startLabel);
+		startLabelBox.setAlignment(Pos.CENTER);
+		
+                Label subBytesLabel = Components.getDefaultLabel("SUBBYTES", false, 18);
+		HBox subBytesLabelBox = new HBox();
+		subBytesLabelBox.getChildren().add(subBytesLabel);
+		subBytesLabelBox.setAlignment(Pos.CENTER);
+
+                Label shiftRowLabel = Components.getDefaultLabel("SHIFTROWS", false, 18);
+		HBox shiftRowLabelBox = new HBox();
+		shiftRowLabelBox.getChildren().add(shiftRowLabel);
+		shiftRowLabelBox.setAlignment(Pos.CENTER);
+
+                Label mixColumnLabel = Components.getDefaultLabel("MIXCOLUMNS", false, 18);
+		HBox mixColumnLabelBox = new HBox();
+		mixColumnLabelBox.getChildren().add(mixColumnLabel);
+		mixColumnLabelBox.setAlignment(Pos.CENTER);
+
+                Label roundKeyLabel = Components.getDefaultLabel("ROUND KEY", false, 18);
+		HBox roundKeyLabelBox = new HBox();
+		roundKeyLabelBox.getChildren().add(roundKeyLabel);
+		roundKeyLabelBox.setAlignment(Pos.CENTER);
+
+		Label galoisAddSymbol = Components.getDefaultLabel("+", true, 50);
+                VBox galoisAddSymbolContainer = new VBox();
+                galoisAddSymbolContainer.getChildren().add(galoisAddSymbol);
+                galoisAddSymbolContainer.setAlignment(Pos.CENTER);
+
+                Label equalsSymbol = Components.getDefaultLabel("\u003d", true, 50);
+                VBox equalsSymbolContainer = new VBox();
+                equalsSymbolContainer.getChildren().add(equalsSymbol);
+                equalsSymbolContainer.setAlignment(Pos.CENTER);
+
+		GridPane stateGrid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 4; col++) {
+				Label cell = getCell(state[row][col], 40, 40, "plain-matrix-cell");
+				stateGrid.add(cell, col, row+1);
+			}
+		}
+
+		VBox stateBox = new VBox(10);
+		stateBox.getChildren().addAll(startLabelBox, stateGrid);
+
+		GridPane subByteGrid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 4; col++) {
+				Label cell = getEmptyCell(40, 40, "plain-matrix-cell-empty");
+				subByteGrid.add(cell, col, row+1);
+			}
+		}
+
+		VBox subByteBox = new VBox(10);
+		subByteBox.getChildren().addAll(subBytesLabelBox, subByteGrid);
+
+		GridPane shiftRowGrid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 4; col++) {
+				Label cell = getEmptyCell(40, 40, "plain-matrix-cell-empty");
+				shiftRowGrid.add(cell, col, row+1);
+			}
+		}
+
+		
+		VBox shiftRowBox = new VBox(10);
+		shiftRowBox.getChildren().addAll(shiftRowLabelBox, shiftRowGrid);
+
+		GridPane mixColumnGrid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 4; col++) {
+				Label cell = getEmptyCell(40, 40, "plain-matrix-cell-empty");
+				mixColumnGrid.add(cell, col, row+1);
+			}
+		}
+
+		VBox mixColumnBox = new VBox(10);
+		mixColumnBox.getChildren().addAll(mixColumnLabelBox, mixColumnGrid);
+
+		GridPane roundKeyGrid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 4; col++) {
+				Label cell = getCell(cipherKey[row][col], 40, 40, "key-matrix-cell");
+				roundKeyGrid.add(cell, col, row+1);
+			}
+		}
+
+		VBox roundKeyBox = new VBox(10);
+		roundKeyBox.getChildren().addAll(roundKeyLabelBox, roundKeyGrid);
+
+		HBox gridBox = new HBox(20);
+		gridBox.getChildren().addAll(
+				inputLabelBox, 
+				stateBox, 
+				subByteBox, 
+				shiftRowBox, 
+				mixColumnBox, 
+				galoisAddSymbolContainer, 
+				roundKeyBox, 
+				equalsSymbolContainer
+		);
+		gridBox.setAlignment(Pos.CENTER);
+
+		return gridBox;
+	}
+
+	public static HBox createRounds(String round, int[][] state, int[][] subByte, int[][] shiftRow, int[][] mixColumn, int[][] roundKey) {
+		Label roundLabel = getDefaultLabel(round, true, 18);
+		VBox roundLabelBox = new VBox();
+		roundLabelBox.getChildren().add(roundLabel);
+		roundLabelBox.setAlignment(Pos.CENTER);
+
+		Label galoisAddSymbol = Components.getDefaultLabel("+", true, 50);
+                VBox galoisAddSymbolContainer = new VBox();
+                galoisAddSymbolContainer.getChildren().add(galoisAddSymbol);
+                galoisAddSymbolContainer.setAlignment(Pos.CENTER);
+
+                Label equalsSymbol = Components.getDefaultLabel("\u003d", true, 50);
+                VBox equalsSymbolContainer = new VBox();
+                equalsSymbolContainer.getChildren().add(equalsSymbol);
+                equalsSymbolContainer.setAlignment(Pos.CENTER);
+
+		GridPane stateGrid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 4; col++) {
+				Label cell = getCell(state[row][col], 40, 40, "plain-matrix-cell");
+				stateGrid.add(cell, col, row+1);
+			}
+		}
+
+		GridPane subByteGrid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 4; col++) {
+				Label cell = getCell(subByte[row][col], 40, 40, "plain-matrix-cell");
+				subByteGrid.add(cell, col, row+1);
+			}
+		}
+
+		GridPane shiftRowGrid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 4; col++) {
+				Label cell = getCell(shiftRow[row][col], 40, 40, "plain-matrix-cell");
+				shiftRowGrid.add(cell, col, row+1);
+			}
+		}
+		
+		GridPane mixColumnGrid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 4; col++) {
+				Label cell = getCell(mixColumn[row][col], 40, 40, "plain-matrix-cell");
+				mixColumnGrid.add(cell, col, row+1);
+			}
+		}
+
+		GridPane roundKeyGrid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 4; col++) {
+				Label cell = getCell(roundKey[row][col], 40, 40, "round-key-matrix-cell");
+				roundKeyGrid.add(cell, col, row+1);
+			}
+		}
+
+		HBox gridBox = new HBox(20);
+		gridBox.getChildren().addAll(
+				roundLabelBox, 
+				stateGrid, 
+				subByteGrid, 
+				shiftRowGrid, 
+				mixColumnGrid, 
+				galoisAddSymbolContainer, 
+				roundKeyGrid, 
+				equalsSymbolContainer
+		);
+		gridBox.setAlignment(Pos.CENTER);
+
+		return gridBox;
+	}
+
+	public static HBox createFinalRound(int[][] state, int[][] subByte, int[][] shiftRow, int[][] roundKey) {
+		Label roundLabel = getDefaultLabel("ROUND 10", true, 18);
+		VBox roundLabelBox = new VBox();
+		roundLabelBox.getChildren().add(roundLabel);
+		roundLabelBox.setAlignment(Pos.CENTER);
+
+		Label galoisAddSymbol = Components.getDefaultLabel("+", true, 50);
+                VBox galoisAddSymbolContainer = new VBox();
+                galoisAddSymbolContainer.getChildren().add(galoisAddSymbol);
+                galoisAddSymbolContainer.setAlignment(Pos.CENTER);
+
+                Label equalsSymbol = Components.getDefaultLabel("\u003d", true, 50);
+                VBox equalsSymbolContainer = new VBox();
+                equalsSymbolContainer.getChildren().add(equalsSymbol);
+                equalsSymbolContainer.setAlignment(Pos.CENTER);
+
+		GridPane stateGrid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 4; col++) {
+				Label cell = getCell(state[row][col], 40, 40, "plain-matrix-cell");
+				stateGrid.add(cell, col, row+1);
+			}
+		}
+
+		GridPane subByteGrid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 4; col++) {
+				Label cell = getCell(subByte[row][col], 40, 40, "plain-matrix-cell");
+				subByteGrid.add(cell, col, row+1);
+			}
+		}
+
+		GridPane shiftRowGrid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 4; col++) {
+				Label cell = getCell(shiftRow[row][col], 40, 40, "plain-matrix-cell");
+				shiftRowGrid.add(cell, col, row+1);
+			}
+		}
+		
+		GridPane mixColumnGrid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 4; col++) {
+				Label cell = getEmptyCell(40, 40, "plain-matrix-cell-empty");
+				mixColumnGrid.add(cell, col, row+1);
+			}
+		}
+
+		GridPane roundKeyGrid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 4; col++) {
+				Label cell = getCell(roundKey[row][col], 40, 40, "round-key-matrix-cell");
+				roundKeyGrid.add(cell, col, row+1);
+			}
+		}
+
+		HBox gridBox = new HBox(20);
+		gridBox.getChildren().addAll(
+				roundLabelBox, 
+				stateGrid, 
+				subByteGrid, 
+				shiftRowGrid, 
+				mixColumnGrid, 
+				galoisAddSymbolContainer, 
+				roundKeyGrid, 
+				equalsSymbolContainer
+		);
+		gridBox.setAlignment(Pos.CENTER);
+
+		return gridBox;
+	}
+
+	public static HBox getAESCipherText(int[][] cipherTextState) {
+		Label cipherTextLabel = getDefaultLabel("OUTPUT", true, 18);
+		VBox cipherTextLabelBox = new VBox();
+		cipherTextLabelBox.getChildren().add(cipherTextLabel);
+		cipherTextLabelBox.setAlignment(Pos.CENTER);
+
+		GridPane cipherTextGrid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 4; col++) {
+				Label cell = getCell(cipherTextState[row][col], 40, 40, "plain-matrix-cell-substituted");
+				cipherTextGrid.add(cell, col, row+1);
+			}
+		}
+
+		HBox gridBox = new HBox(20);
+		gridBox.getChildren().addAll(cipherTextLabelBox, cipherTextGrid);
+		gridBox.setAlignment(Pos.CENTER);
 
 		return gridBox;
 	}

@@ -19,7 +19,9 @@ public class AESSection implements Section {
 	private int[][] subBytesState = new int[4][4];
 	private int[][] shiftRowsState = new int[4][4];
 	private int[][] mixColumnsState = new int[4][4];
-	private int[][] keyMatrix = new int[4][4];
+	private int[][] addRoundKeyState = new int[4][4];
+	private int[][] cipherKeyState = new int[4][4];
+	private int[][] roundKeyState = new int[4][4];
 
         private Label[][] plainCells = new Label[4][4];
         private Label[][] keyCells = new Label[4][4];
@@ -198,17 +200,17 @@ public class AESSection implements Section {
 	}
 
 
-	private VBox updateStateColumn(int[][] cells, int[] newColumn, VBox stateGrid, int column) {
+	private VBox updateStateColumn(int[][] cells, Label[][] labelCells, int[] newColumn, VBox stateGrid, int column, String newStyle, String oldStyle) {
 		for (int row = 0; row < 4; row++) {
 			cells[row][column] = newColumn[row];
 		}
 
 		stateGrid = Components.updatedColumnMatrixGrid(
 				"STATE", 
-				plainCells, 
+				labelCells, 
 				cells, 
-				"mix-column-matrix-cell", 
-				"plain-matrix-cell", 
+				newStyle,	
+				oldStyle,
 				column
 		);
 
@@ -254,10 +256,6 @@ public class AESSection implements Section {
 
 				mixColumnsBox.getChildren().add(calculationSection);
 
-				for (int i = 0; i < 4; i++) {
-					plainCells[index[0]][i].setText(Components.toHex(shiftRowsState[index[0]][i]));
-				}
-
 				index[0]++;
 
                                 PauseTransition pause = new PauseTransition(Duration.seconds(3));
@@ -267,7 +265,16 @@ public class AESSection implements Section {
 					PauseTransition removeElements = new PauseTransition(Duration.seconds(2));
 
 					removeElements.setOnFinished(ev -> {
-						VBox currentStateGrid = updateStateColumn(mixColumnsState, mixColumn, stateGrid, index[0]-1);
+						VBox currentStateGrid = updateStateColumn(
+								mixColumnsState,
+							       	plainCells, 
+								mixColumn, 
+								stateGrid, 
+								index[0]-1, 
+								"mix-column-matrix-cell", 
+								"plain-matrix-cell"
+						); 
+
 						mixColumnsBox.getChildren().clear();
 						mixColumnsBox.getChildren().add(currentStateGrid);
 						animator[0].run();
@@ -281,20 +288,142 @@ public class AESSection implements Section {
                         mixColumnDelay.play();
                 };
 
-		PauseTransition initialDelay = new PauseTransition(Duration.seconds(1));
-		initialDelay.setOnFinished(e -> animator[0].run());
-		initialDelay.play();
+		animator[0].run();
 
 		return mixColumnsBox;
 		
 	} 
+
+	private HBox addRoundKeyVisualize() {
+		addRoundKeyState = copyState(mixColumnsState);
+		VBox stateGrid = Components.createMatrixGrid("STATE", plainCells, addRoundKeyState, "plain-matrix-cell");
+		VBox keyGrid = Components.createMatrixGrid("ROUND KEY", keyCells, roundKeyState, "round-key-matrix-cell");
+
+		Label galoisAddSymbol = Components.getDefaultLabel("+", true, 50);
+		VBox galoisAddSymbolContainer = new VBox();
+		galoisAddSymbolContainer.getChildren().add(galoisAddSymbol);
+		galoisAddSymbolContainer.setAlignment(Pos.CENTER);
+
+		Label equalsSymbol = Components.getDefaultLabel("\u003d", true, 50);
+		VBox equalsSymbolContainer = new VBox();
+		equalsSymbolContainer.getChildren().add(equalsSymbol);
+		equalsSymbolContainer.setAlignment(Pos.CENTER);
+
+		HBox addRoundKeyBox = new HBox(100);
+		addRoundKeyBox.getChildren().addAll(stateGrid);
+		addRoundKeyBox.setAlignment(Pos.CENTER);
+
+		final int[] index = {0};
+
+		Runnable[] animator = new Runnable[1];
+
+		animator[0] = () -> {
+                        if(index[0] >= 4) return;
+
+                        PauseTransition addRoundKeyDelay = new PauseTransition(Duration.seconds(2));
+
+                        addRoundKeyDelay.setOnFinished(e -> {
+				int[] stateColumn = AES.copyColumn(addRoundKeyState, index[0]);
+				int[] roundKeyColumn = AES.copyColumn(roundKeyState, index[0]);
+				int[] resultColumn = AES.galoisAddColumn(stateColumn, roundKeyColumn);
+
+				VBox stateColumnArray = Components.createSingleColumnArray(stateColumn, "plain-matrix-cell");
+				VBox roundKeyColumnArray = Components.createSingleColumnArray(roundKeyColumn, "round-key-matrix-cell");
+				VBox resultColumnArray = Components.createSingleColumnArray(resultColumn, "plain-matrix-cell-substituted");
+
+				HBox calculationSection = new HBox(20);
+				calculationSection.getChildren().addAll(stateColumnArray, galoisAddSymbolContainer, roundKeyColumnArray, equalsSymbolContainer);
+
+				addRoundKeyBox.getChildren().addAll(calculationSection, keyGrid);
+
+				index[0]++;
+
+                                PauseTransition pause = new PauseTransition(Duration.seconds(3));
+                                pause.setOnFinished(event -> {
+					calculationSection.getChildren().add(resultColumnArray);
+
+					PauseTransition removeElements = new PauseTransition(Duration.seconds(2));
+
+					removeElements.setOnFinished(ev -> {
+						VBox currentStateGrid = updateStateColumn(
+								addRoundKeyState, 
+								keyCells, 
+								resultColumn, 
+								stateGrid, 
+								index[0]-1,
+								"plain-matrix-cell-substituted", 
+								"plain-matrix-cell"
+						);
+
+						addRoundKeyBox.getChildren().clear();
+						addRoundKeyBox.getChildren().add(currentStateGrid);
+						animator[0].run();
+					});
+
+					removeElements.play();
+				});
+                                pause.play();
+                        });
+
+                        addRoundKeyDelay.play();
+                };
+
+		PauseTransition initialDelay = new PauseTransition(Duration.seconds(2));
+		initialDelay.setOnFinished(e -> animator[0].run());
+		initialDelay.play();
+
+		return addRoundKeyBox;
+		
+	} 
+
+	private VBox allRoundsVisualize() {
+		int[][] plainText = copyState(plainTextState);	
+		int[][] cipherKey = copyState(cipherKeyState);	
+		int[][] roundKey = copyState(cipherKey);
+		int[][] state = copyState(plainText);
+
+		HBox inputRoundSection = Components.createInputRound(plainText, cipherKey);
+		VBox allRoundsBox = new VBox(20);
+		allRoundsBox.getChildren().add(inputRoundSection);
+
+		for (int round = 1; round < 10; round++) {
+		
+			state = AES.addRoundKey(state, roundKey);
+			int[][] subByte = AES.getSubstitutedMatrix(state);
+			int[][] shiftRow = AES.shiftRows(subByte);
+			int[][] mixColumn = AES.mixColumns(shiftRow);
+			roundKey = AES.getRoundKey(roundKey, round); 
+
+			HBox roundSection = Components.createRounds(String.format("ROUND %d", round), state, subByte, shiftRow, mixColumn, roundKey);
+			state = copyState(mixColumn);
+
+			allRoundsBox.getChildren().add(roundSection);
+		}
+
+		state = AES.addRoundKey(state, roundKey);
+		int[][] subByte = AES.getSubstitutedMatrix(state);
+		int[][] shiftRow = AES.shiftRows(subByte);
+		roundKey = AES.getRoundKey(roundKey, 10); 
+
+		HBox finalRoundSection = Components.createFinalRound(state, subByte, shiftRow, roundKey);
+		allRoundsBox.getChildren().add(finalRoundSection);
+
+		state = copyState(shiftRow);
+		state = AES.addRoundKey(state, roundKey);
+
+		HBox cipherTextSection = Components.getAESCipherText(state);
+		allRoundsBox.getChildren().add(cipherTextSection);
+
+		return allRoundsBox;
+	}
 
 	private void visualize(HBox matrixBox) {
                 String plaintext = inputField.getText();
                 String key = keyField.getText();
 
                 plainTextState = AES.bytesToMatrix(plaintext);
-                keyMatrix = AES.bytesToMatrix(key);
+                cipherKeyState = AES.bytesToMatrix(key);
+		roundKeyState = AES.getRoundKey(cipherKeyState, 1);
 
                 Button previousButton = new Button("previous");
                 Button nextButton = new Button("next");
@@ -302,7 +431,9 @@ public class AESSection implements Section {
                 List<Supplier<Node>> steps = List.of(
                         this::subBytesVisualize,
                         this::shiftRowsVisualize,
-                        this::mixColumnsVisualize
+                        this::mixColumnsVisualize,
+			this::addRoundKeyVisualize,
+			this::allRoundsVisualize
                 );
 
                 final int[] currentStep = {0};
