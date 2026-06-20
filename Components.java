@@ -246,6 +246,7 @@ public class Components {
 		return cell;
 	
 	}
+	
 	public static VBox createMatrixGrid(String title, Label[][] cells, int[][] matrix, String style) {
 		Label gridLabel = getDefaultLabel(title, false, 18);
 		HBox gridLabelBox = new HBox();
@@ -307,6 +308,74 @@ public class Components {
 				cell.getStyleClass().add("sbox-matrix-cell");
 				cells[row][col] = cell;
 				grid.add(cell, col, row);
+			}
+		}
+
+		VBox gridBox = new VBox(15);
+		gridBox.getChildren().addAll(gridLabelBox, grid);
+
+		return gridBox;
+	}
+
+	public static HBox createMixColumnMatrix() {
+		int[][] mixColumnMatrix = AES.MIX_COLUMN;
+
+		GridPane grid = new GridPane();
+		grid.setHgap(25);
+		grid.setVgap(20);
+		grid.setAlignment(Pos.CENTER);
+
+		for (int row = 0; row < mixColumnMatrix.length; row++) {
+			for (int col = 0; col < mixColumnMatrix[row].length; col++) {
+				Label label = getDefaultLabel(toHex(mixColumnMatrix[row][col]), false, 18);
+				grid.add(label, col, row);
+			}
+		}
+
+		VBox leftBracket = new VBox();
+		leftBracket.setMinWidth(20);
+		leftBracket.getStyleClass().add("left-bracket");
+
+		VBox rightBracket = new VBox();
+		rightBracket.setMinWidth(20);
+		rightBracket.getStyleClass().add("right-bracket");
+
+		HBox matrix = new HBox(10);
+		matrix.getChildren().addAll(leftBracket, grid, rightBracket);
+		matrix.setAlignment(Pos.CENTER);
+
+		return matrix;
+	}
+
+	public static VBox createSingleColumnArray(int[] column, String style) {
+		GridPane grid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			Label cell = getCell(column[row], 60, 60, style);
+			grid.add(cell, 0, row+1);
+		}
+
+		VBox gridBox = new VBox(15);
+		gridBox.getChildren().addAll(grid);
+
+		return gridBox;
+		
+	}
+
+	public static VBox updatedColumnMatrixGrid(String title, Label[][] cells, int[][] matrix, String newStyle, String oldStyle, int columns) {
+		Label gridLabel = getDefaultLabel(title, false, 18);
+		HBox gridLabelBox = new HBox();
+		gridLabelBox.getChildren().add(gridLabel);
+		gridLabelBox.setAlignment(Pos.CENTER);
+
+		GridPane grid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 4; col++) {
+				String style = col <= columns ? newStyle : oldStyle;
+				Label cell = getCell(matrix[row][col], 60, 60, style);
+				cells[row][col] = cell;
+				grid.add(cell, col, row+1);
 			}
 		}
 

@@ -2,16 +2,23 @@
 
 import javafx.animation.PauseTransition;
 import javafx.geometry.Pos;
+import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.GridPane;
+import javafx.scene.Node;
 import javafx.util.Duration;
+import java.util.List;
+import java.util.function.Supplier;
 
 public class AESSection implements Section { 
-	private int[][] state = new int[4][4];
+	private int[][] plainTextState = new int[4][4];
+	private int[][] subBytesState = new int[4][4];
+	private int[][] shiftRowsState = new int[4][4];
+	private int[][] mixColumnsState = new int[4][4];
 	private int[][] keyMatrix = new int[4][4];
 
         private Label[][] plainCells = new Label[4][4];
@@ -51,8 +58,9 @@ public class AESSection implements Section {
 		}
 	}
 
-	private HBox subBytesVisualize(int[][] state) {
-		VBox stateGrid = Components.createMatrixGrid("STATE", plainCells, state, "plain-matrix-cell");
+	private HBox subBytesVisualize() {
+		subBytesState = copyState(plainTextState);
+		VBox stateGrid = Components.createMatrixGrid("STATE", plainCells, subBytesState, "plain-matrix-cell");
 		stateGrid.setAlignment(Pos.CENTER);
 		VBox sBoxGrid = Components.createSBoxMatrixGrid("SBOX", sBoxCells);
 
@@ -72,7 +80,7 @@ public class AESSection implements Section {
                         int stateRow = index[0] % 4;
                         int stateColumn = index[0] / 4;
 
-                        int value = state[stateRow][stateColumn];
+                        int value = subBytesState[stateRow][stateColumn];
 
                         int row = value >> 0x4;
                         int column = value & 0xF;
@@ -99,7 +107,10 @@ public class AESSection implements Section {
                                 sBoxCells[row + 1][column + 1].getStyleClass().add("sbox-matrix-cell-highlight");
                         }
 
-                        PauseTransition substitutionDelay = new PauseTransition(Duration.seconds(1));
+			double delay = (stateColumn == 0) ? 1.0 : 0.15;
+			double nextDelay = (stateColumn == 0) ? 2.0 : 0.15;
+
+                        PauseTransition substitutionDelay = new PauseTransition(Duration.seconds(delay));
 
                         substitutionDelay.setOnFinished(e -> {
                                 plainCells[stateRow][stateColumn].getStyleClass().remove("plain-matrix-cell");
@@ -108,13 +119,13 @@ public class AESSection implements Section {
                                         plainCells[stateRow][stateColumn].getStyleClass().add("plain-matrix-cell-substituted");
                                 }
 
-				state[stateRow][stateColumn] = AES.SBOX[row][column];
+				subBytesState[stateRow][stateColumn] = AES.SBOX[row][column];
                                 plainCells[stateRow][stateColumn]
                                                 .setText(Components.toHex(AES.SBOX[row][column]));
 
                                 index[0]++;
 
-                                PauseTransition pause = new PauseTransition(Duration.seconds(2));
+                                PauseTransition pause = new PauseTransition(Duration.seconds(nextDelay));
                                 pause.setOnFinished(event -> animator[0].run());
                                 pause.play();
                         });
@@ -129,33 +140,203 @@ public class AESSection implements Section {
 		return subBytesBox;
 	}
 
-	private HBox shiftRowsVisualize(int[][] state) {
-		VBox stateGird = Components.createMatrixGrid("STATE", plainCells, state, "plain-matrix-cell");
+	private HBox shiftRowsVisualize() {
+		Label arrow = Components.getDefaultLabel("\u2190", true, 30);
+		arrow.setAlignment(Pos.CENTER);
 
-		HBox shiftRowsBox = new HBox(20);
-		shiftRowsBox.getChildren().addAll(stateGird);
+		shiftRowsState = copyState(subBytesState);
+		VBox stateGrid = Components.createMatrixGrid("STATE", plainCells, shiftRowsState, "plain-matrix-cell");
+
+		HBox shiftRowsBox = new HBox(10);
+		shiftRowsBox.getChildren().add(stateGrid);
 		shiftRowsBox.setAlignment(Pos.CENTER);
+
+		final int[] index = {0};
+
+		Runnable[] animator = new Runnable[1];
+
+		animator[0] = () -> {
+                        if(index[0] >= 3) return;
+
+			Label descriptionText = Components.getDefaultLabel(String.format("rotate over %d byte(s)", index[0]+1), false, 25);
+			HBox descriptionContainer = new HBox(30);
+			descriptionContainer.getChildren().addAll(arrow, descriptionText);
+
+			VBox descriptionBox = new VBox();
+			descriptionBox.getChildren().add(descriptionContainer);
+
+			VBox.setMargin(descriptionContainer, new Insets(110 + (60 * index[0]), 0, 0, 0));
+
+			shiftRowsBox.getChildren().add(descriptionBox);
+
+                        PauseTransition shiftDelay = new PauseTransition(Duration.seconds(3));
+
+                        shiftDelay.setOnFinished(e -> {
+                                index[0]++;
+				shiftRowsState = AES.shiftRow(shiftRowsState, index[0]);
+
+				for (int i = 0; i < 4; i++) {
+					plainCells[index[0]][i].setText(Components.toHex(shiftRowsState[index[0]][i]));
+				}
+
+                                PauseTransition pause = new PauseTransition(Duration.seconds(3));
+                                pause.setOnFinished(event -> {
+					shiftRowsBox.getChildren().remove(descriptionBox);
+					animator[0].run();
+				});
+                                pause.play();
+                        });
+
+                        shiftDelay.play();
+                };
+
+		PauseTransition initialDelay = new PauseTransition(Duration.seconds(2));
+		initialDelay.setOnFinished(e -> animator[0].run());
+		initialDelay.play();
 
 		return shiftRowsBox;
 	}
 
-	private void visualize(HBox matrixBox) {
-		String plaintext = inputField.getText();
-		String key = keyField.getText();
 
-		state = AES.bytesToMatrix(plaintext);
-		keyMatrix = AES.bytesToMatrix(key);
-		int[][] prevState = copyState(state);
+	private VBox updateStateColumn(int[][] cells, int[] newColumn, VBox stateGrid, int column) {
+		for (int row = 0; row < 4; row++) {
+			cells[row][column] = newColumn[row];
+		}
 
-		Button previousButton = new Button("previous");
-		Button nextButton = new Button("next");
+		stateGrid = Components.updatedColumnMatrixGrid(
+				"STATE", 
+				plainCells, 
+				cells, 
+				"mix-column-matrix-cell", 
+				"plain-matrix-cell", 
+				column
+		);
 
-		matrixBox.getChildren().addAll(previousButton, subBytesVisualize(prevState), nextButton);
-		matrixBox.setAlignment(Pos.CENTER);
-
-		nextButton.setOnAction(e -> matrixBox.getChildren().set(1, shiftRowsVisualize(state)));
-		previousButton.setOnAction(e -> matrixBox.getChildren().set(1, subBytesVisualize(prevState)));
+		return stateGrid;
 	}
+	private HBox mixColumnsVisualize() {
+		mixColumnsState = copyState(shiftRowsState);
+		VBox stateGrid = Components.createMatrixGrid("STATE", plainCells, mixColumnsState, "plain-matrix-cell");
+		HBox mixColumnMatrix = Components.createMixColumnMatrix();
+
+		Label galoisMultiplySymbol = Components.getDefaultLabel("\u22c5", true, 50);
+		VBox galoisMultiplySymbolContainer = new VBox();
+		galoisMultiplySymbolContainer.getChildren().add(galoisMultiplySymbol);
+		galoisMultiplySymbolContainer.setAlignment(Pos.CENTER);
+
+		Label equalsSymbol = Components.getDefaultLabel("\u003d", true, 50);
+		VBox equalsSymbolContainer = new VBox();
+		equalsSymbolContainer.getChildren().add(equalsSymbol);
+		equalsSymbolContainer.setAlignment(Pos.CENTER);
+
+		HBox mixColumnsBox = new HBox(100);
+		mixColumnsBox.getChildren().add(stateGrid);
+		mixColumnsBox.setAlignment(Pos.CENTER);
+
+		final int[] index = {0};
+
+		Runnable[] animator = new Runnable[1];
+
+		animator[0] = () -> {
+                        if(index[0] >= 4) return;
+
+                        PauseTransition mixColumnDelay = new PauseTransition(Duration.seconds(2));
+
+                        mixColumnDelay.setOnFinished(e -> {
+				int[] column = AES.copyColumn(mixColumnsState, index[0]);
+				int[] mixColumn = AES.mixColumn(column);
+
+				VBox columnArray = Components.createSingleColumnArray(column, "plain-matrix-cell");
+				VBox mixColumnArray = Components.createSingleColumnArray(mixColumn, "mix-column-matrix-cell");
+
+				HBox calculationSection = new HBox(20);
+				calculationSection.getChildren().addAll(mixColumnMatrix, galoisMultiplySymbolContainer, columnArray, equalsSymbolContainer);
+
+				mixColumnsBox.getChildren().add(calculationSection);
+
+				for (int i = 0; i < 4; i++) {
+					plainCells[index[0]][i].setText(Components.toHex(shiftRowsState[index[0]][i]));
+				}
+
+				index[0]++;
+
+                                PauseTransition pause = new PauseTransition(Duration.seconds(3));
+                                pause.setOnFinished(event -> {
+					calculationSection.getChildren().add(mixColumnArray);
+
+					PauseTransition removeElements = new PauseTransition(Duration.seconds(2));
+
+					removeElements.setOnFinished(ev -> {
+						VBox currentStateGrid = updateStateColumn(mixColumnsState, mixColumn, stateGrid, index[0]-1);
+						mixColumnsBox.getChildren().clear();
+						mixColumnsBox.getChildren().add(currentStateGrid);
+						animator[0].run();
+					});
+
+					removeElements.play();
+				});
+                                pause.play();
+                        });
+
+                        mixColumnDelay.play();
+                };
+
+		PauseTransition initialDelay = new PauseTransition(Duration.seconds(1));
+		initialDelay.setOnFinished(e -> animator[0].run());
+		initialDelay.play();
+
+		return mixColumnsBox;
+		
+	} 
+
+	private void visualize(HBox matrixBox) {
+                String plaintext = inputField.getText();
+                String key = keyField.getText();
+
+                plainTextState = AES.bytesToMatrix(plaintext);
+                keyMatrix = AES.bytesToMatrix(key);
+
+                Button previousButton = new Button("previous");
+                Button nextButton = new Button("next");
+
+                List<Supplier<Node>> steps = List.of(
+                        this::subBytesVisualize,
+                        this::shiftRowsVisualize,
+                        this::mixColumnsVisualize
+                );
+
+                final int[] currentStep = {0};
+
+                matrixBox.getChildren().addAll(
+                        previousButton,
+                        steps.get(currentStep[0]).get(),
+                        nextButton
+                );
+                matrixBox.setAlignment(Pos.CENTER);
+
+                Runnable updateView = () -> {
+                        matrixBox.getChildren().set(1, steps.get(currentStep[0]).get());
+
+                        previousButton.setDisable(currentStep[0] == 0);
+                        nextButton.setDisable(currentStep[0] == steps.size() - 1);
+                };
+
+                nextButton.setOnAction(e -> {
+                        if (currentStep[0] < steps.size() - 1) {
+                                currentStep[0]++;
+                                updateView.run();
+                        }
+                });
+
+                previousButton.setOnAction(e -> {
+                        if (currentStep[0] > 0) {
+                                currentStep[0]--;
+                                updateView.run();
+                        }
+                });
+
+                updateView.run();
+        }
 
 	@Override
 	public VBox getSection() {
@@ -187,11 +368,9 @@ public class AESSection implements Section {
 		userInputBox.setAlignment(Pos.CENTER);
 
 		encryptButton = Components.getDefaultButton("ENCRYPT");
-		decryptButton = Components.getDefaultButton("DECRYPT");
-		resetButton = Components.getDefaultButton("RESET");
 
-		HBox buttonsBox = new HBox(45);
-		buttonsBox.getChildren().addAll(encryptButton, decryptButton, resetButton);
+		HBox buttonsBox = new HBox();
+		buttonsBox.getChildren().add(encryptButton);
 		buttonsBox.setAlignment(Pos.CENTER);
 
 		VBox controls = new VBox(35);

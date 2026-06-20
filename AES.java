@@ -60,7 +60,7 @@ public class AES {
 		{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 	};
 
-	private static int[] copyColumn(int[][] array, int column) {
+	public static int[] copyColumn(int[][] array, int column) {
 		int result[] = new int[4];
 
 		for (int i = 0; i < 4; i++) {
@@ -219,6 +219,16 @@ public class AES {
                 return result;
         }
 
+	public static int[][] shiftRow(int[][] matrix, int row) {
+		int[][] result = copyMatrix(matrix);
+
+		for(int col = 0; col < 4; col++) {
+			int shiftIndex = (col - row + 4) % 4;
+			result[row][shiftIndex] = matrix[row][col];
+		}
+
+		return result;
+	}
 
         public static int[][] shiftRows(int[][] matrix) {
                 int[][] result = new int[4][4];
