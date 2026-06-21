@@ -15,6 +15,14 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
+/**
+ * Implements an interactive Caesar cipher visualization using JavaFX.
+ *
+ * <p>This section allows users to encrypt and decrypt text using a Caesar cipher
+ * while visually demonstrating each character transformation against an alphabet
+ * reference grid. The process is animated step-by-step using JavaFX timelines.</p>
+ */
+
 public class CaesarCipherSection implements Section { 
 	private TextField inputField;
 	private Spinner<Integer> spinner;
@@ -23,6 +31,17 @@ public class CaesarCipherSection implements Section {
 	private Button encryptButton;
 	private Button decryptButton;
 	private Button resetButton;
+
+	/**
+	 * Executes the animated Caesar cipher transformation for the input text.
+	 *
+	 * <p>Each character is processed sequentially. Letters are highlighted in the
+	 * alphabet grid during transformation, while non-letter characters are passed
+	 * through without modification. The animation is controlled using a JavaFX
+	 * Timeline.</p>
+	 *
+	 * @param encrypt if true, encryption is performed; otherwise decryption is applied
+	 */
 
 	private void visualize(boolean encrypt) {
 		Components.resetHighlights(alphabetLabels);
@@ -117,6 +136,15 @@ public class CaesarCipherSection implements Section {
 
 		timeline.play();
 	}
+
+	/**
+	 * Builds and returns the JavaFX UI for the Caesar cipher visualization section.
+	 *
+	 * <p>This includes input controls, shift selector, encryption/decryption buttons,
+	 * alphabet reference grid, and output display area.</p>
+	 *
+	 * @return the root container for the Caesar cipher UI
+	 */
 
 	@Override
 	public VBox getSection() {

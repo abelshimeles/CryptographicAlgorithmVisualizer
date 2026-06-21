@@ -2,6 +2,16 @@
 
 package cryptographyvisualize;
 
+/**
+ * Provides functionality for demonstrating the Advanced Encryption
+ * Standard (AES) encryption algorithm.
+ * <p>
+ * This class contains AES lookup tables, key expansion operations,
+ * state transformations, and AES-128 encryption methods used for
+ * educational visualization purposes.
+ * </p>
+ */
+
 public class AES {
 	public static final int[][] SBOX = {
 		{0x63,0x7C,0x77,0x7B,0xF2,0x6B,0x6F,0xC5,0x30,0x01,0x67,0x2B,0xFE,0xD7,0xAB,0x76},
@@ -337,6 +347,14 @@ public class AES {
                 return resultMatrix;
         }
 
+	/**
+	 * Converts a 16-character string into a 4x4 AES state matrix.
+	 *
+	 * @param message the input string
+	 * @return the corresponding AES state matrix
+	 * @throws IllegalArgumentException if the message length is not 16
+	 */
+
         public static int[][] bytesToMatrix(String message) {
                 if (message.length() != 16) {
                         throw new IllegalArgumentException(
@@ -358,6 +376,14 @@ public class AES {
                 return byteMatrix;
         }
 
+	/**
+	 * Converts an AES state matrix into its hexadecimal string
+	 * representation.
+	 *
+	 * @param matrix the state matrix to convert
+	 * @return a hexadecimal string representing the matrix contents
+	 */
+
 	public static String matrixToHex(int[][] matrix) {
 		StringBuilder hex = new StringBuilder();
 
@@ -369,6 +395,14 @@ public class AES {
 
 		return hex.toString();
 	}
+
+	/**
+	 * Encrypts a 16-character plaintext block using the AES-128 algorithm.
+	 *
+	 * @param plaintext the plaintext block to encrypt
+	 * @param cipherKey the 16-character encryption key
+	 * @return the encrypted ciphertext as a hexadecimal string
+	 */
 
 	public static String encrypt(String plaintext, String cipherKey) {
 		int[][] state = bytesToMatrix(plaintext);

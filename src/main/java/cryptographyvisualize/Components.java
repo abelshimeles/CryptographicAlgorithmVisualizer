@@ -16,6 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Provides reusable JavaFX UI components and helper methods used
+ * throughout the application.
+ */
+
 public class Components { 
 	public static final String DEFAULT_FONT = "Inter";
 
@@ -41,6 +46,15 @@ public class Components {
                 return labelMessageContainer;
 
         }
+
+	/**
+	 * Creates a selector for switching between cryptographic algorithm
+	 * visualizations.
+	 *
+	 * @param onSelection action to perform when an algorithm is selected
+	 * @param options the available algorithm options
+	 * @return a container holding the selection controls
+	 */
 
 	public static HBox createAlgorithmSelector(Consumer<String> onSelection, String... options) {
 		HBox container = new HBox(10);
@@ -139,6 +153,15 @@ public class Components {
 		}
 	}
 
+	/**
+	 * Creates a labeled input component for entering a Diffie-Hellman parameter.
+	 *
+	 * @param labelField the text field used to enter the parameter value
+	 * @param title the parameter description displayed to the user
+	 * @param symbol the mathematical symbol associated with the parameter
+	 * @return a container holding the parameter label and input field
+	 */
+
 	public static VBox getDiffieHellmanParameter(TextField labelField, String title, String symbol) {
                 Label labelMessage = Components.getDefaultLabel(title, false, 18);
                 Label labelSymbol = Components.getDefaultLabel(symbol, false, 18);
@@ -158,6 +181,16 @@ public class Components {
 
 		return labelContainer;
 	} 
+
+	/**
+	 * Creates a visual representation of a Diffie-Hellman key calculation,
+	 * including the formula, substituted values, and computed result.
+	 *
+	 * @param variables the symbolic variables used in the displayed formula
+	 * @param values the numeric values substituted into the calculation
+	 * @param answer the computed result of the calculation
+	 * @return a container displaying the complete calculation
+	 */
 
 	public static VBox getKeyCalculation(String[] variables, long[] values, long answer) {
                 Label userLabel = Components.getDefaultLabel(variables[0] + " Computes", false, 18);
@@ -538,6 +571,19 @@ public class Components {
 		return gridBox;
 	}
 
+	/**
+	 * Creates a visualization of an AES encryption round showing the output
+	 * of each transformation stage and the corresponding round key.
+	 *
+	 * @param round the round label to display
+	 * @param state the state matrix before transformation
+	 * @param subByte the state after the SubBytes transformation
+	 * @param shiftRow the state after the ShiftRows transformation
+	 * @param mixColumn the state after the MixColumns transformation
+	 * @param roundKey the round key used in the AddRoundKey step
+	 * @return a container representing the AES round visualization
+	 */
+
 	public static HBox createRounds(String round, int[][] state, int[][] subByte, int[][] shiftRow, int[][] mixColumn, int[][] roundKey) {
 		Label roundLabel = getDefaultLabel(round, true, 18);
 		VBox roundLabelBox = new VBox();
@@ -745,6 +791,13 @@ public class Components {
 
 		return gridBox;
 	}
+
+	/**
+	 * Converts a byte value to a two-digit hexadecimal string.
+	 *
+	 * @param value the value to convert
+	 * @return the hexadecimal representation of the value
+	 */
 
 	public static String toHex(int value) {
 		return String.format("%02x", value & 0xFF).toUpperCase();

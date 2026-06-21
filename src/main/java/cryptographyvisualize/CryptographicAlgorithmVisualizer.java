@@ -21,10 +21,27 @@ import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 import javafx.stage.Stage;
 
+/**
+ * Main JavaFX application for visualizing cryptographic algorithms.
+ * <p>
+ * Provides a graphical interface that allows users to select and
+ * interact with different cryptographic algorithm visualizations,
+ * including Caesar Cipher, Diffie-Hellman, and AES.
+ * </p>
+ */
+
 public class CryptographicAlgorithmVisualizer extends Application {
 	private String[] algorithms = {"Caesar Cipher", "Diffie-Hellman", "AES"};
 	private VBox sectionContainer = new VBox();
 	private Section algorithmSection;
+
+	/**
+	* Updates the displayed algorithm visualization section based on the
+	* selected algorithm.
+	*
+	* @param algorithm the name of the algorithm whose visualization
+	*                  section should be displayed
+	*/
 
 	private void setSection(String algorithm) {
 		switch (algorithm) {
@@ -42,6 +59,16 @@ public class CryptographicAlgorithmVisualizer extends Application {
 		sectionContainer.getChildren().setAll(algorithmSection.getSection());
 
 	}
+
+	/**
+	* {@inheritDoc}
+	*
+	* Initializes and displays the application's graphical user interface.
+	* The interface includes the application title, algorithm selection
+	* controls, and the currently selected algorithm visualization section.
+	*
+	* @param stage the primary stage for this application
+	*/
 
 	@Override
 	public void start(Stage stage) {
@@ -82,6 +109,12 @@ public class CryptographicAlgorithmVisualizer extends Application {
 			stage.setMaximized(true);
 		});
 	}
+
+	/**
+	* Launches the Cryptographic Algorithm Visualizer application.
+	*
+	* @param args command-line arguments passed to the application
+	*/
 
 	public static void main(String[] args) {
 		launch(args);

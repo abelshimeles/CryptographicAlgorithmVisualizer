@@ -17,6 +17,20 @@ import java.util.List;
 import java.util.function.Supplier;
 
 
+/**
+ * Provides an interactive JavaFX-based visualization of the AES encryption process.
+ *
+ * <p>This class orchestrates the step-by-step animation of AES operations, including
+ * AddRoundKey, SubBytes, ShiftRows, MixColumns, and key schedule generation.
+ * Each transformation stage is rendered using JavaFX UI components and updated
+ * over time using timed transitions to illustrate the internal state changes
+ * of the algorithm.</p>
+ *
+ * <p>The visualization is driven by user input (plaintext and key), which is
+ * converted into 4x4 state matrices. The class manages both the cryptographic
+ * transformations and their corresponding UI representations.</p>
+ */
+
 public class AESSection implements Section {
 	private int[][] plainTextState = new int[4][4];
 	private int[][] subBytesState = new int[4][4];
@@ -45,6 +59,13 @@ public class AESSection implements Section {
 	private Button encryptButton;
 	private Label validationMessage;
 
+	/**
+	 * Resets the validation state of the input fields and hides any error message.
+	 *
+	 * <p>All error styles are removed from the plaintext and key fields,
+	 * restoring them to their default visual state.</p>
+	 */
+
 	private void clearValidation() {
 		validationMessage.setVisible(false);
 
@@ -54,6 +75,16 @@ public class AESSection implements Section {
 		inputField.getStyleClass().remove("input-field");
 		keyField.getStyleClass().remove("input-field");
 	}
+
+	/**
+	 * Displays a validation error message and visually highlights the affected input field.
+	 *
+	 * <p>The provided field is marked with an error style, and the validation message
+	 * is shown to the user.</p>
+	 *
+	 * @param field the input field that caused the validation error
+	 * @param message the error message to display
+	 */
 
 	private void showValidationError(TextField field, String message) {
 		validationMessage.setText(message);
@@ -797,6 +828,14 @@ public class AESSection implements Section {
 
 	}
 
+	/**
+	 * Handles the AES encryption visualization pipeline based on user input.
+	 * Input validation is performed, AES state matrices are initialized, and
+	 * each transformation step is executed sequentially with timed transitions.
+	 *
+	 * @param matrixBox container used to render each visualization stage
+	 */
+
 	private void visualize(HBox matrixBox) {
 		clearValidation();
 
@@ -858,6 +897,17 @@ public class AESSection implements Section {
 
 		runner[0].run();
 	}
+
+	/**
+	 * Builds and returns the JavaFX UI for the AES visualization section.
+	 *
+	 * <p>This method constructs the input fields for plaintext and key,
+	 * initializes validation messaging, and sets up the encryption trigger
+	 * button. It also prepares the container where all visualization stages
+	 * are rendered sequentially.</p>
+	 *
+	 * @return the root UI container for the AES visualization section
+	 */
 
 	@Override
 	public VBox getSection() {

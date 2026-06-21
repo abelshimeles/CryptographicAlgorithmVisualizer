@@ -10,6 +10,17 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.util.Duration;
 
+/**
+ * Implements an interactive Diffie-Hellman key exchange visualization using JavaFX.
+ *
+ * <p>This section allows users to input cryptographic parameters (prime, generator,
+ * and private secrets) and visually observe the generation of public keys,
+ * key exchange process, and shared secret computation.</p>
+ *
+ * <p>The visualization is presented in sequential stages using timed transitions
+ * to illustrate how both parties derive a common secret over an insecure channel.</p>
+ */
+
 public class DiffieHellmanSection implements Section {
         private TextField primeField = new TextField();
         private TextField generatorField = new TextField();
@@ -39,6 +50,17 @@ public class DiffieHellmanSection implements Section {
                         field.getStyleClass().add("input-field-error");
                 }
         }
+
+	/**
+	 * Executes the Diffie-Hellman key exchange visualization.
+	 *
+	 * <p>Validates user input parameters, computes public keys, simulates the key
+	 * exchange between Alice and Bob, and finally derives the shared secret.
+	 * The results are displayed in staged animations.</p>
+	 *
+	 * <p>If invalid input is detected, appropriate validation messages are shown
+	 * and the process is aborted.</p>
+	 */
 
         private void visualize() {
                 clearValidation();
@@ -182,6 +204,16 @@ public class DiffieHellmanSection implements Section {
 
                 timeline.play();
         }
+
+	/**
+	 * Builds and returns the JavaFX UI for the Diffie-Hellman visualization section.
+	 *
+	 * <p>This includes input fields for prime, generator, and private secrets,
+	 * validation messaging, a start button, and a container for the animated
+	 * visualization output.</p>
+	 *
+	 * @return the root UI container for the Diffie-Hellman section
+	 */
 
         @Override
         public VBox getSection() {
