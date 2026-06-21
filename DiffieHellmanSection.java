@@ -8,135 +8,213 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.util.Duration;
 
-public class DiffieHellmanSection implements Section { 
-	private TextField primeField = new TextField();
-	private TextField generatorField = new TextField();
-	private TextField aliceSecretField = new TextField();
-	private TextField bobSecretField = new TextField();
-	private Button exchangeButton;
+public class DiffieHellmanSection implements Section {
+        private TextField primeField = new TextField();
+        private TextField generatorField = new TextField();
+        private TextField aliceSecretField = new TextField();
+        private TextField bobSecretField = new TextField();
+        private Button exchangeButton;
+        private Label validationMessage;
 
-	private String[] alicePublicKeyParameters = {"Alice", "A", "g", "a"};
-	private String[] bobPublicKeyParameters = {"Bob", "B", "g", "b"};
+        private String[] alicePublicKeyParameters = {"Alice", "A", "g", "a"};
+        private String[] bobPublicKeyParameters = {"Bob", "B", "g", "b"};
 
-	private String[] aliceSharedSecretParameters = {"Alice", "S", "B", "a"};
-	private String[] bobSharedSecretParameters = {"Bob", "S", "A", "b"};
-	private VBox visualizationContainer = new VBox(40);
+        private String[] aliceSharedSecretParameters = {"Alice", "S", "B", "a"};
+        private String[] bobSharedSecretParameters = {"Bob", "S", "A", "b"};
+        private VBox visualizationContainer = new VBox(40);
 
-	private void visualize() {
-		try {
-			long p = Long.parseLong(primeField.getText());
-			long g = Long.parseLong(generatorField.getText());
-			long a = Long.parseLong(aliceSecretField.getText());
-			long b = Long.parseLong(bobSecretField.getText());
+        private void clearValidation() {
+                validationMessage.setVisible(false);
 
-			if (p <= 1 || g <= 0 || a <= 0 || b <= 0) {
-				return;
-			}
+                primeField.getStyleClass().remove("input-field-error");
+                generatorField.getStyleClass().remove("input-field-error");
+                aliceSecretField.getStyleClass().remove("input-field-error");
+                bobSecretField.getStyleClass().remove("input-field-error");
+        }
 
-			visualizationContainer.getChildren().clear();
+        private void markInvalid(TextField field) {
+                if (!field.getStyleClass().contains("input-field-error")) {
+                        field.getStyleClass().add("input-field-error");
+                }
+        }
 
-			long A = DiffieHellman.calculateKey(g, a, p);
-			long B = DiffieHellman.calculateKey(g, b, p);
+        private void visualize() {
+                clearValidation();
 
-			long S = DiffieHellman.calculateKey(B, a, p);
+                boolean hasError = false;
 
-			VBox alicePublicKeyCalculation = Components.getKeyCalculation(alicePublicKeyParameters,new long[]{g, a, p}, A);
+                Long p = null;
+                Long g = null;
+                Long a = null;
+                Long b = null;
 
-			VBox bobPublicKeyCalculation = Components.getKeyCalculation(bobPublicKeyParameters, new long[]{g, b, p}, B);
+                try {
+                        p = Long.parseLong(primeField.getText().trim());
 
-			HBox publicKeysMessageContainer = Components.getColoredMessageLabel("PUBLIC KEY", false, 18);
+                        if (p <= 1) {
+                                markInvalid(primeField);
+                                hasError = true;
+                        }
 
-			HBox publicKeyCalculationsSection = Components.getKeyCalculationSection(alicePublicKeyCalculation, bobPublicKeyCalculation);
+                } catch (NumberFormatException ex) {
+                        markInvalid(primeField);
+                        hasError = true;
+                }
 
-			VBox publicKeysContainer = new VBox(20);
-			publicKeysContainer.getChildren().addAll(publicKeysMessageContainer, publicKeyCalculationsSection);
+                try {
+                        g = Long.parseLong(generatorField.getText().trim());
 
-			HBox exchangeMessageContainer = Components.getColoredMessageLabel("EXCHANGE", false, 18);
+                        if (g <= 0) {
+                                markInvalid(generatorField);
+                                hasError = true;
+                        }
 
-			HBox exchangeAlice = Components.getKeyExchangeSection("Alice", "Bob", "A", A);
+                } catch (NumberFormatException ex) {
+                        markInvalid(generatorField);
+                        hasError = true;
+                }
 
-			HBox exchangeBob = Components.getKeyExchangeSection("Bob", "Alice", "B", B);
+                try {
+                        a = Long.parseLong(aliceSecretField.getText().trim());
 
-			VBox exchangeSection = new VBox(30);
-			exchangeSection.getChildren().addAll(exchangeAlice, exchangeBob);
-			exchangeSection.setAlignment(Pos.CENTER);
+                        if (a <= 0) {
+                                markInvalid(aliceSecretField);
+                                hasError = true;
+                        }
 
-			VBox exchangeContainer = new VBox(20);
-			exchangeContainer.getChildren().addAll(exchangeMessageContainer, exchangeSection);
+                } catch (NumberFormatException ex) {
+                        markInvalid(aliceSecretField);
+                        hasError = true;
+                }
 
-			VBox aliceSharedSecretCalculation = Components.getKeyCalculation(aliceSharedSecretParameters, new long[]{B, a, p}, S);
+                try {
+                        b = Long.parseLong(bobSecretField.getText().trim());
 
-			VBox bobSharedSecretCalculation = Components.getKeyCalculation(bobSharedSecretParameters, new long[]{A, b, p}, S);
+                        if (b <= 0) {
+                                markInvalid(bobSecretField);
+                                hasError = true;
+                        }
 
-			HBox sharedSecretMessageContainer = Components.getColoredMessageLabel("SHARED SECRET", false, 18);
+                } catch (NumberFormatException ex) {
+                        markInvalid(bobSecretField);
+                        hasError = true;
+                }
 
-			HBox sharedSecretCalculationsSection = Components.getKeyCalculationSection(
-					aliceSharedSecretCalculation, 
-					bobSharedSecretCalculation
-			);
+                if (hasError) {
+                        validationMessage.setText(
+                                        "All parameters must be valid positive numbers. Prime (p) must be greater than 1."
+                        );
+                        validationMessage.setVisible(true);
+                        return;
+                }
 
-			VBox sharedSecretContainer = new VBox(20);
-			sharedSecretContainer.getChildren().addAll(sharedSecretMessageContainer, sharedSecretCalculationsSection);
+                visualizationContainer.getChildren().clear();
 
-			//visualizationContainer.getChildren().addAll(publicKeysContainer, exchangeContainer, sharedSecretContainer);
-			exchangeButton.setDisable(true);
-			Timeline timeline = new Timeline(
-				new KeyFrame(
-					Duration.seconds(2),
-					e -> {
-						visualizationContainer.getChildren().add(publicKeysContainer);			
-					}
-				),			
+                long A = DiffieHellman.calculateKey(g, a, p);
+                long B = DiffieHellman.calculateKey(g, b, p);
 
-				new KeyFrame(
-					Duration.seconds(4),
-					e -> {
-						visualizationContainer.getChildren().add(exchangeContainer);			
-					}
-				),			
+                long S = DiffieHellman.calculateKey(B, a, p);
 
-				new KeyFrame(
-					Duration.seconds(6),
-					e -> {
-						visualizationContainer.getChildren().add(sharedSecretContainer);			
-						exchangeButton.setDisable(false);
-					}
-				)			
-			);
+                VBox alicePublicKeyCalculation = Components.getKeyCalculation(alicePublicKeyParameters, new long[]{g, a, p}, A);
 
-			timeline.play();
+                VBox bobPublicKeyCalculation = Components.getKeyCalculation(bobPublicKeyParameters, new long[]{g, b, p}, B);
 
-		} catch (NumberFormatException e) {
-			System.out.println("Invalid Input");
-		}
-	}
+                HBox publicKeysMessageContainer = Components.getColoredMessageLabel("PUBLIC KEY", false, 18);
 
+                HBox publicKeyCalculationsSection = Components.getKeyCalculationSection(alicePublicKeyCalculation, bobPublicKeyCalculation);
 
-	@Override
-	public VBox getSection() {
-		HBox parametersMessageContainer = Components.getColoredMessageLabel("PARAMETERS", false, 18);
-		
-		VBox primeContainer = Components.getDiffieHellmanParameter(primeField, "Prime", "(p)");
-		VBox generatorContainer = Components.getDiffieHellmanParameter(generatorField, "Generator", "(g)");
-		VBox aliceSecretContainer = Components.getDiffieHellmanParameter(aliceSecretField, "Alice's Secret", "(a)");
-		VBox bobSecretContainer = Components.getDiffieHellmanParameter(bobSecretField, "Bob's Secret", "(b)");
+                VBox publicKeysContainer = new VBox(20);
+                publicKeysContainer.getChildren().addAll(publicKeysMessageContainer, publicKeyCalculationsSection);
 
-		exchangeButton = Components.getDefaultButton("START");
-		exchangeButton.setOnAction(e -> visualize());
-		HBox exchangeButtonContainer = new HBox();
-		exchangeButtonContainer.getChildren().add(exchangeButton);
-		exchangeButtonContainer.setAlignment(Pos.CENTER);
+                HBox exchangeMessageContainer = Components.getColoredMessageLabel("EXCHANGE", false, 18);
 
-		HBox inputFields = new HBox(50);
-		inputFields.getChildren().addAll(primeContainer, generatorContainer, aliceSecretContainer, bobSecretContainer);
-		inputFields.setAlignment(Pos.CENTER);
+                HBox exchangeAlice = Components.getKeyExchangeSection("Alice", "Bob", "A", A);
 
-		VBox inputFieldsContainer = new VBox(20);
-		inputFieldsContainer.getChildren().addAll(parametersMessageContainer, inputFields, exchangeButtonContainer);	
+                HBox exchangeBob = Components.getKeyExchangeSection("Bob", "Alice", "B", B);
 
-		VBox section = new VBox(40);
-		section.getChildren().addAll(inputFieldsContainer, visualizationContainer); 
+                VBox exchangeSection = new VBox(30);
+                exchangeSection.getChildren().addAll(exchangeAlice, exchangeBob);
+                exchangeSection.setAlignment(Pos.CENTER);
 
-		return section;
-	}
+                VBox exchangeContainer = new VBox(20);
+                exchangeContainer.getChildren().addAll(exchangeMessageContainer, exchangeSection);
+
+                VBox aliceSharedSecretCalculation = Components.getKeyCalculation(aliceSharedSecretParameters, new long[]{B, a, p}, S);
+
+                VBox bobSharedSecretCalculation = Components.getKeyCalculation(bobSharedSecretParameters, new long[]{A, b, p}, S);
+
+                HBox sharedSecretMessageContainer = Components.getColoredMessageLabel("SHARED SECRET", false, 18);
+
+                HBox sharedSecretCalculationsSection = Components.getKeyCalculationSection(
+                                aliceSharedSecretCalculation,
+                                bobSharedSecretCalculation
+                );
+
+                VBox sharedSecretContainer = new VBox(20);
+                sharedSecretContainer.getChildren().addAll(sharedSecretMessageContainer, sharedSecretCalculationsSection);
+                exchangeButton.setDisable(true);
+
+                Timeline timeline = new Timeline(
+                                new KeyFrame(
+                                                Duration.seconds(2),
+                                                e -> {
+                                                        visualizationContainer.getChildren().add(publicKeysContainer);
+                                                }
+                                ),
+
+                                new KeyFrame(
+                                                Duration.seconds(4),
+                                                e -> {
+                                                        visualizationContainer.getChildren().add(exchangeContainer);
+                                                }
+                                ),
+
+                                new KeyFrame(
+                                                Duration.seconds(6),
+                                                e -> {
+                                                        visualizationContainer.getChildren().add(sharedSecretContainer);
+                                                        exchangeButton.setDisable(false);
+                                                }
+                                )
+                );
+
+                timeline.play();
+        }
+
+        @Override
+        public VBox getSection() {
+                HBox parametersMessageContainer = Components.getColoredMessageLabel("PARAMETERS", false, 18);
+
+                VBox primeContainer = Components.getDiffieHellmanParameter(primeField, "Prime", "(p)");
+                VBox generatorContainer = Components.getDiffieHellmanParameter(generatorField, "Generator", "(g)");
+                VBox aliceSecretContainer = Components.getDiffieHellmanParameter(aliceSecretField, "Alice's Secret", "(a)");
+                VBox bobSecretContainer = Components.getDiffieHellmanParameter(bobSecretField, "Bob's Secret", "(b)");
+
+                exchangeButton = Components.getDefaultButton("START");
+                exchangeButton.setOnAction(e -> visualize());
+
+                HBox exchangeButtonContainer = new HBox();
+                exchangeButtonContainer.getChildren().add(exchangeButton);
+                exchangeButtonContainer.setAlignment(Pos.CENTER);
+
+                HBox inputFields = new HBox(50);
+                inputFields.getChildren().addAll(primeContainer, generatorContainer, aliceSecretContainer, bobSecretContainer);
+                inputFields.setAlignment(Pos.CENTER);
+
+                validationMessage = new Label();
+                validationMessage.getStyleClass().add("validation-message");
+                validationMessage.setVisible(false);
+
+		HBox validationMessageBox = new HBox();
+		validationMessageBox.getChildren().add(validationMessage);
+		validationMessageBox.setAlignment(Pos.CENTER);
+
+                VBox inputFieldsContainer = new VBox(20);
+                inputFieldsContainer.getChildren().addAll(parametersMessageContainer, inputFields, validationMessageBox, exchangeButtonContainer);
+
+                VBox section = new VBox(20);
+                section.getChildren().addAll(inputFieldsContainer, visualizationContainer);
+
+                return section;
+        }
 }

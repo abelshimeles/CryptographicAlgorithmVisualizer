@@ -235,3 +235,17 @@
 	-fx-border-color: black;
 	-fx-border-width: 2 2 2 0;
 }
+
+.input-field-error {
+	-fx-background-color: transparent;
+	-fx-border-color: red;
+	-fx-border-radius: 4;
+	-fx-border-width: 5px;
+	-fx-text-fill: #30384a;
+}
+
+.validation-message {
+	-fx-text-fill: red;
+	-fx-font-size: 14px;
+	-fx-font-weight: bold;
+}

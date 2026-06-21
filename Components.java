@@ -326,6 +326,28 @@ public class Components {
 		return gridBox;
 	}
 
+	public static VBox createRconMatrixGrid(String title, Label[][] cells, String style) {
+		Label gridLabel = getDefaultLabel(title, false, 18);
+		HBox gridLabelBox = new HBox();
+		gridLabelBox.getChildren().add(gridLabel);
+		gridLabelBox.setAlignment(Pos.CENTER);
+
+		GridPane grid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 10; col++) {
+				Label cell = getCell(AES.RCON[row][col], 40, 40, style);
+				cells[row][col] = cell;
+				grid.add(cell, col, row+1);
+			}
+		}
+
+		VBox gridBox = new VBox(15);
+		gridBox.getChildren().addAll(gridLabelBox, grid);
+
+		return gridBox;
+	}
+
 	public static HBox createMixColumnMatrix() {
 		int[][] mixColumnMatrix = AES.MIX_COLUMN;
 
@@ -686,6 +708,28 @@ public class Components {
 		HBox gridBox = new HBox(20);
 		gridBox.getChildren().addAll(cipherTextLabelBox, cipherTextGrid);
 		gridBox.setAlignment(Pos.CENTER);
+
+		return gridBox;
+	}
+
+	public static VBox createRoundKeyMatrixGrid(String title, Label[][] cells, int[][] matrix, String style, boolean[] empty) {
+		Label gridLabel = getDefaultLabel(title, false, 18);
+		HBox gridLabelBox = new HBox();
+		gridLabelBox.getChildren().add(gridLabel);
+		gridLabelBox.setAlignment(Pos.CENTER);
+
+		GridPane grid = new GridPane();
+
+		for (int row = 0; row < 4; row++) {
+			for (int col = 0; col < 4; col++) {
+				Label cell = empty[col] ? getEmptyCell(60, 60, "plain-matrix-cell-empty") : getCell(matrix[row][col], 60, 60, style);
+				cells[row][col] = cell;
+				grid.add(cell, col, row+1);
+			}
+		}
+
+		VBox gridBox = new VBox(15);
+		gridBox.getChildren().addAll(gridLabelBox, grid);
 
 		return gridBox;
 	}
