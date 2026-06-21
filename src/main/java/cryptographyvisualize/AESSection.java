@@ -23,6 +23,7 @@ public class AESSection implements Section {
 	private int[][] shiftRowsState = new int[4][4];
 	private int[][] mixColumnsState = new int[4][4];
 	private int[][] addRoundKeyState = new int[4][4];
+	private int[][] addCipherKeyState = new int[4][4];
 	private int[][] cipherKeyState = new int[4][4];
 	private int[][] roundKeyState = new int[4][4];
 	private int[][] keySceduleState = new int[4][4];
@@ -348,6 +349,94 @@ public class AESSection implements Section {
 
 	}
 
+	private VBox addCipherKeyVisualize() {
+		Label title = Components.getDefaultLabel("ADD ROUND KEY", true, 18);
+		HBox titleBox = new HBox();
+		titleBox.getChildren().add(title);
+		titleBox.setAlignment(Pos.CENTER);
+
+	    addCipherKeyState = copyState(plainTextState);
+	    VBox stateGrid = Components.createMatrixGrid("PLAINTEXT", plainCells, addCipherKeyState, "plain-matrix-cell");
+	    VBox keyGrid = Components.createMatrixGrid("CIPHER KEY", keyCells, cipherKeyState, "key-matrix-cell");
+
+	    Label galoisAddSymbol = Components.getDefaultLabel("+", true, 50);
+	    VBox galoisAddSymbolContainer = new VBox();
+	    galoisAddSymbolContainer.getChildren().add(galoisAddSymbol);
+	    galoisAddSymbolContainer.setAlignment(Pos.CENTER);
+
+	    Label equalsSymbol = Components.getDefaultLabel("\u003d", true, 50);
+	    VBox equalsSymbolContainer = new VBox();
+	    equalsSymbolContainer.getChildren().add(equalsSymbol);
+	    equalsSymbolContainer.setAlignment(Pos.CENTER);
+
+	    HBox addCipherKeyBox = new HBox(100);
+	    addCipherKeyBox.getChildren().addAll(stateGrid);
+	    addCipherKeyBox.setAlignment(Pos.CENTER);
+
+	    VBox resultBox = new VBox(30, titleBox, addCipherKeyBox);
+
+	    final int[] index = {0};
+
+	    Runnable[] animator = new Runnable[1];
+
+	    animator[0] = () -> {
+		    if(index[0] >= 4) return;
+
+		    PauseTransition addCipherKeyDelay = new PauseTransition(Duration.seconds(2));
+
+		    addCipherKeyDelay.setOnFinished(e -> {
+			    int[] stateColumn = AES.copyColumn(addCipherKeyState, index[0]);
+			    int[] roundKeyColumn = AES.copyColumn(cipherKeyState, index[0]);
+			    int[] resultColumn = AES.galoisAddColumn(stateColumn, roundKeyColumn);
+
+			    VBox stateColumnArray = Components.createSingleColumnArray(stateColumn, "plain-matrix-cell");
+			    VBox roundKeyColumnArray = Components.createSingleColumnArray(roundKeyColumn, "round-key-matrix-cell");
+			    VBox resultColumnArray = Components.createSingleColumnArray(resultColumn, "plain-matrix-cell-substituted");
+
+			    HBox calculationSection = new HBox(20);
+			    calculationSection.getChildren().addAll(stateColumnArray, galoisAddSymbolContainer, roundKeyColumnArray, equalsSymbolContainer);
+
+			    addCipherKeyBox.getChildren().addAll(calculationSection, keyGrid);
+
+			    index[0]++;
+
+			    PauseTransition pause = new PauseTransition(Duration.seconds(2));
+			    pause.setOnFinished(event -> {
+				    calculationSection.getChildren().add(resultColumnArray);
+
+				    PauseTransition removeElements = new PauseTransition(Duration.seconds(2));
+
+				    removeElements.setOnFinished(ev -> {
+					    VBox currentStateGrid = updateStateColumn(
+							    addCipherKeyState,
+							    keyCells,
+							    resultColumn,
+							    stateGrid,
+							    index[0]-1,
+							    "plain-matrix-cell-substituted",
+							    "plain-matrix-cell"
+					    );
+
+					    addCipherKeyBox.getChildren().clear();
+					    addCipherKeyBox.getChildren().add(currentStateGrid);
+					    animator[0].run();
+				    });
+
+				    removeElements.play();
+			    });
+			    pause.play();
+		    });
+
+		    addCipherKeyDelay.play();
+	    };
+
+	    PauseTransition initialDelay = new PauseTransition(Duration.seconds(2));
+	    initialDelay.setOnFinished(e -> animator[0].run());
+	    initialDelay.play();
+
+	    return resultBox;
+
+	}
 	private VBox addRoundKeyVisualize() {
 		Label title = Components.getDefaultLabel("ADD ROUND KEY", true, 18);
 		HBox titleBox = new HBox();
@@ -734,6 +823,7 @@ public class AESSection implements Section {
 		roundKeyState = AES.getRoundKey(cipherKeyState, 1);
 
 		List<Supplier<Node>> steps = List.of(
+			this::addCipherKeyVisualize,
 			this::subBytesVisualize,
 			this::shiftRowsVisualize,
 			this::mixColumnsVisualize,
