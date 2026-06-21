@@ -698,6 +698,16 @@ public class Components {
 		cipherTextLabelBox.getChildren().add(cipherTextLabel);
 		cipherTextLabelBox.setAlignment(Pos.CENTER);
 
+		Label cipherText = getDefaultLabel(AES.matrixToHex(cipherTextState), false, 18);
+		VBox cipherTextBox = new VBox();
+		cipherTextBox.getChildren().add(cipherText);
+		cipherTextBox.setAlignment(Pos.CENTER);
+
+                Label equalsSymbol = Components.getDefaultLabel("\u003d", true, 50);
+                VBox equalsSymbolContainer = new VBox();
+                equalsSymbolContainer.getChildren().add(equalsSymbol);
+                equalsSymbolContainer.setAlignment(Pos.CENTER);
+
 		GridPane cipherTextGrid = new GridPane();
 
 		for (int row = 0; row < 4; row++) {
@@ -708,7 +718,7 @@ public class Components {
 		}
 
 		HBox gridBox = new HBox(20);
-		gridBox.getChildren().addAll(cipherTextLabelBox, cipherTextGrid);
+		gridBox.getChildren().addAll(cipherTextLabelBox, cipherTextGrid, equalsSymbolContainer, cipherTextBox);
 		gridBox.setAlignment(Pos.CENTER);
 
 		return gridBox;

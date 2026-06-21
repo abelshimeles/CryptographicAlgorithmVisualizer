@@ -399,7 +399,7 @@ public class AESSection implements Section {
 
 			    index[0]++;
 
-			    PauseTransition pause = new PauseTransition(Duration.seconds(3));
+			    PauseTransition pause = new PauseTransition(Duration.seconds(2));
 			    pause.setOnFinished(event -> {
 				    calculationSection.getChildren().add(resultColumnArray);
 
@@ -757,7 +757,7 @@ public class AESSection implements Section {
 
 			index[0]++;
 
-			PauseTransition waitForCompletion = new PauseTransition(Duration.seconds(20));
+			PauseTransition waitForCompletion = new PauseTransition(Duration.seconds(30));
 
 			waitForCompletion.setOnFinished(e -> {
 				runner[0].run();

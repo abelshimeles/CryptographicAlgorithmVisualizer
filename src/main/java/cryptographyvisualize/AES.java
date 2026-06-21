@@ -363,7 +363,7 @@ public class AES {
 
 		for (int col = 0; col < 4; col++) {
 			for (int row = 0; row < 4; row++) {
-				hex.append(String.format("%02x", matrix[row][col] & 0xFF));
+				hex.append(String.format("%02X", matrix[row][col] & 0xFF));
 			}
 		}
 
@@ -394,13 +394,4 @@ public class AES {
 		return ciphertext;
 		
 	}
-
-        public static void main(String[] args) {
-                String plaintext = "plaintextmessage";
-                String key = "abcdefghijklmnop";
-
-                String ciphertext = AES.encrypt(plaintext, key);
-                System.out.println("Ciphertext: " + ciphertext);
-
-        }
 }
