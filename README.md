@@ -50,15 +50,12 @@ https://maven.apache.org/download.cgi
 Select:
 - Binary zip archive
 
----
-
 ### 2. Extract the ZIP file
 
 Extract the downloaded archive anywhere on your system.
 
----
 
-### 3. Run Maven directly (no PATH setup required)
+### 3. Run Maven directly
 
 Open Command Prompt (cmd) or PowerShell, then navigate to the cloned folder:
 
@@ -100,6 +97,12 @@ Maven will automatically:
 ```sh
 mvn clean compile
 ```
+
+## Resources Used for Implementation
+
+- https://www.samiam.org/rijndael.html
+- https://formaestudio.com/rijndaelinspector/archivos/Rijndael_Animation_v4_eng-html5.html
+- https://powergr.github.io/cipherflow-visualizer/
 
 # License
 
