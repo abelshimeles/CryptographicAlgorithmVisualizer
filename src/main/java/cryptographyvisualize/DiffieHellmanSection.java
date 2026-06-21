@@ -1,3 +1,5 @@
+package cryptographyvisualize;
+
 import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
 import javafx.geometry.Pos;

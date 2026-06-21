@@ -1,3 +1,5 @@
+package cryptographyvisualize;
+
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.geometry.Insets;
@@ -70,13 +72,15 @@ public class CryptographicAlgorithmVisualizer extends Application {
 		
 		// Scene
 		Scene scene = new Scene(root);
-		scene.getStylesheets().add("style.css");
+		scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
 		
 		// Setting Stage values and then showing it
 		stage.setTitle("Cryptographic Algorithm Visualizer");
 		stage.setScene(scene);
-		stage.setMaximized(true);
 		stage.show();
+		javafx.application.Platform.runLater(() -> {
+			stage.setMaximized(true);
+		});
 	}
 
 	public static void main(String[] args) {

@@ -1,5 +1,7 @@
 // Animation steps learned and implemented from https://formaestudio.com/rijndaelinspector/archivos/Rijndael_Animation_v4_eng-html5.html
 
+package cryptographyvisualize;
+
 import javafx.animation.PauseTransition;
 import javafx.geometry.Pos;
 import javafx.geometry.Insets;
@@ -40,8 +42,6 @@ public class AESSection implements Section {
 	private TextField inputField;
 	private TextField keyField;
 	private Button encryptButton;
-	private Button decryptButton;
-	private Button resetButton;
 	private Label validationMessage;
 
 	private void clearValidation() {
@@ -728,6 +728,9 @@ public class AESSection implements Section {
 			return;
 		}
 
+		matrixBox.getChildren().clear();
+		encryptButton.setDisable(true);
+
 		roundKeyState = AES.getRoundKey(cipherKeyState, 1);
 
 		List<Supplier<Node>> steps = List.of(
@@ -735,8 +738,7 @@ public class AESSection implements Section {
 			this::shiftRowsVisualize,
 			this::mixColumnsVisualize,
 			this::addRoundKeyVisualize,
-			this::allRoundsVisualize,
-			this::keySceduleVisualize
+			this::allRoundsVisualize
 		);
 
 		final int[] index = {0};
@@ -746,6 +748,7 @@ public class AESSection implements Section {
 		runner[0] = () -> {
 
 			if (index[0] >= steps.size()) {
+				encryptButton.setDisable(false);
 				return;
 			}
 
@@ -754,7 +757,7 @@ public class AESSection implements Section {
 
 			index[0]++;
 
-			PauseTransition waitForCompletion = new PauseTransition(Duration.seconds(30));
+			PauseTransition waitForCompletion = new PauseTransition(Duration.seconds(20));
 
 			waitForCompletion.setOnFinished(e -> {
 				runner[0].run();
@@ -817,5 +820,4 @@ public class AESSection implements Section {
 
 		return section;
 	}
-
 }

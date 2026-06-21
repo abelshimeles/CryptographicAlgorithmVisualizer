@@ -1,3 +1,5 @@
+package cryptographyvisualize;
+
 import javafx.scene.layout.VBox;
 
 public interface Section {

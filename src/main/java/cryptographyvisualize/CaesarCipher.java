@@ -1,3 +1,5 @@
+package cryptographyvisualize;
+
 public class CaesarCipher {
 	public static char encrypt(char ch, int shift) {
 		if (Character.isUpperCase(ch))
