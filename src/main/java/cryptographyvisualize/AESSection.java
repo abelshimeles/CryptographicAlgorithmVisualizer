@@ -421,7 +421,7 @@ public class AESSection implements Section {
 			    int[] resultColumn = AES.galoisAddColumn(stateColumn, roundKeyColumn);
 
 			    VBox stateColumnArray = Components.createSingleColumnArray(stateColumn, "plain-matrix-cell");
-			    VBox roundKeyColumnArray = Components.createSingleColumnArray(roundKeyColumn, "round-key-matrix-cell");
+			    VBox roundKeyColumnArray = Components.createSingleColumnArray(roundKeyColumn, "key-matrix-cell");
 			    VBox resultColumnArray = Components.createSingleColumnArray(resultColumn, "plain-matrix-cell-substituted");
 
 			    HBox calculationSection = new HBox(20);
