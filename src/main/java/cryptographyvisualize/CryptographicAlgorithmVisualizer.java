@@ -1,6 +1,7 @@
 package cryptographyvisualize;
 
 import javafx.application.Application;
+import javafx.geometry.Rectangle2D;
 import javafx.geometry.Pos;
 import javafx.geometry.Insets;
 import javafx.animation.Timeline;
@@ -20,6 +21,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 import javafx.stage.Stage;
+import javafx.stage.Screen;
 
 /**
  * Main JavaFX application for visualizing cryptographic algorithms.
@@ -33,6 +35,7 @@ import javafx.stage.Stage;
 public class CryptographicAlgorithmVisualizer extends Application {
 	private String[] algorithms = {"Caesar Cipher", "Diffie-Hellman", "AES"};
 	private VBox sectionContainer = new VBox();
+	private VBox guideContainer = new VBox();
 	private Section algorithmSection;
 
 	/**
@@ -44,20 +47,27 @@ public class CryptographicAlgorithmVisualizer extends Application {
 	*/
 
 	private void setSection(String algorithm) {
+		String guideFile;
+
 		switch (algorithm) {
 			case "Caesar Cipher":
 				algorithmSection = new CaesarCipherSection();
+				guideFile = "caesar_cipher.md";
 				break;
 			case "Diffie-Hellman":
 				algorithmSection = new DiffieHellmanSection();
+				guideFile = "diffie_hellman.md";
 				break;
 			case "AES":
 				algorithmSection = new AESSection();
+				guideFile = "aes.md";
 				break;
+			default:
+				return;
 		}
 
 		sectionContainer.getChildren().setAll(algorithmSection.getSection());
-
+		guideContainer.getChildren().setAll(Components.createAlgorithmGuide(guideFile));
 	}
 
 	/**
@@ -84,9 +94,12 @@ public class CryptographicAlgorithmVisualizer extends Application {
 		HBox titleBox = new HBox();
 		titleBox.getChildren().add(title);
 		titleBox.setAlignment(Pos.CENTER);
+
+		VBox mainContainer = new VBox(80);
+		mainContainer.getChildren().addAll(sectionContainer, guideContainer);
 		
 		VBox body = new VBox(40);
-		body.getChildren().addAll(titleBox, algorithmsSelectorContainer, sectionContainer);
+		body.getChildren().addAll(titleBox, algorithmsSelectorContainer, mainContainer); 
 		body.setPadding(new Insets(25));
 
 		ScrollPane scrollPane = new ScrollPane(body);
@@ -104,10 +117,15 @@ public class CryptographicAlgorithmVisualizer extends Application {
 		// Setting Stage values and then showing it
 		stage.setTitle("Cryptographic Algorithm Visualizer");
 		stage.setScene(scene);
+
+		Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+
+		stage.setX(screenBounds.getMinX());
+		stage.setY(screenBounds.getMinY());
+		stage.setWidth(screenBounds.getWidth());
+		stage.setHeight(screenBounds.getHeight());
+
 		stage.show();
-		javafx.application.Platform.runLater(() -> {
-			stage.setMaximized(true);
-		});
 	}
 
 	/**

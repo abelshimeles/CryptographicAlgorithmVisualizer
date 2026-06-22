@@ -15,6 +15,11 @@ import javafx.scene.text.FontWeight;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import javafx.scene.web.WebView;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 
 /**
  * Provides reusable JavaFX UI components and helper methods used
@@ -94,6 +99,45 @@ public class Components {
 		if (!buttons.isEmpty()) {
 			buttons.get(0).setSelected(true);
 		}
+
+		return container;
+	}
+
+	public static VBox createAlgorithmGuide(String fileName) {
+		Label title = getDefaultLabel("HOW IT WORKS?", true, 28);
+		HBox titleBox = new HBox();
+
+		titleBox.getChildren().add(title);
+		titleBox.setAlignment(Pos.CENTER);
+
+		String markdown;
+
+		try (InputStream is = Components.class.getResourceAsStream("/guides/" + fileName)) {
+			if (is == null) {
+				throw new RuntimeException("Guide file not found: " + fileName);
+			}
+
+			markdown = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+
+		} catch (Exception e) {
+			markdown = "# Error\n\n" + "Unable to load guide file:\n\n" + fileName;
+		}
+
+		Parser parser = Parser.builder().build();
+		HtmlRenderer renderer = HtmlRenderer.builder().build();
+
+		String html = renderer.render(parser.parse(markdown));
+
+		WebView webView = new WebView();
+		webView.getEngine().loadContent(html);
+		webView.setPrefHeight(1200);
+
+		HBox webViewBox = new HBox();
+		webViewBox.getChildren().add(webView);
+		webViewBox.setAlignment(Pos.CENTER);
+
+		VBox container = new VBox(30);
+		container.getChildren().addAll(titleBox, webViewBox);
 
 		return container;
 	}

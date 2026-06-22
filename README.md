@@ -104,6 +104,11 @@ mvn clean compile
 - https://formaestudio.com/rijndaelinspector/archivos/Rijndael_Animation_v4_eng-html5.html
 - https://powergr.github.io/cipherflow-visualizer/
 
+## Unfinished Features
+- Key Sceduling for AES implementation.
+- Better Educational guide for the algorithms.
+- More Cryptographic Algorithms for visualization.
+
 # License
 
 MIT License
