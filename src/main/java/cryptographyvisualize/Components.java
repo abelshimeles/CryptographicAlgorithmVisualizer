@@ -103,6 +103,13 @@ public class Components {
 		return container;
 	}
 
+	/**
+	 * Creates a "How It Works" guide section from a markdown file.
+	 *
+	 * @param fileName markdown file name in /guides/
+	 * @return VBox containing the guide UI
+	 */
+
 	public static VBox createAlgorithmGuide(String fileName) {
 		Label title = getDefaultLabel("HOW IT WORKS?", true, 28);
 		HBox titleBox = new HBox();
