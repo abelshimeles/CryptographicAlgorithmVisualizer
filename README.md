@@ -105,7 +105,7 @@ mvn clean compile
 - https://powergr.github.io/cipherflow-visualizer/
 
 ## Unfinished Features
-- Key Sceduling for AES implementation.
+- Key Sceduling Visualization for AES.
 - Better Educational guide for the algorithms.
 - More Cryptographic Algorithms for visualization.
 
