@@ -39,7 +39,7 @@ cd CryptographicAlgorithmVisualizer
 
 ## Install Maven
 
-### Windows (winget)
+### Windows 
 ## Install Maven (Windows - ZIP Method)
 
 ### 1. Download Maven
